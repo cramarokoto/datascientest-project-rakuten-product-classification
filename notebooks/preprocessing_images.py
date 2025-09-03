@@ -39,7 +39,7 @@ def prepare_images_df(df_X, n_images=None, split="train", random_state=42):
     else:
         X_img_sample = df_X.sample(n=n_images, random_state=random_state)
 
-    X_img_sample["image_path"] = X_img_sample.apply(lambda row: image_path(row["imageid"], row["productid"], "train"), axis=1)
+    X_img_sample["image_path"] = X_img_sample.apply(lambda row: image_path(row["imageid"], row["productid"], split), axis=1)
     X_img_sample["processed_image_path"] = X_img_sample.apply(lambda row:find_image_gray_path(row["imageid"], row["productid"], split))
     X_img_sample = X_img_sample[["image_path", "processed_image_path"]]
     return X_img_sample
