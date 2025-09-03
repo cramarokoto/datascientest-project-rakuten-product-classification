@@ -21,6 +21,8 @@ X_test = pd.read_csv("./../data/X_test_update.csv", index_col=0)
 # Paths
 image_train_path = "./../data/images/image_train/"
 image_test_path = "./../data/images/image_test/"
+image_gray_path_train = "./../data/images/gray_resized_images_train/"
+image_gray_path_test = "./../data/images/gray_resized_images_test/"
 
 #### Affichage des images
 
@@ -33,6 +35,18 @@ def image_path(imageid, productid, split="train"):
     else:
         raise Exception("split must be train or test.")
 
+    image_path = path + "image_" + str(imageid) + "_product_" + str(productid) + ".jpg"
+    return image_path
+
+
+def find_image_gray_path(imageid, productid, split="train"):
+    if split == "train":
+        path = image_gray_path_train
+    elif split == "test":
+        path = image_gray_path_test
+    else:
+        raise Exception("split must be train or test.")
+    
     image_path = path + "image_" + str(imageid) + "_product_" + str(productid) + ".jpg"
     return image_path
 
@@ -156,8 +170,9 @@ def load_content_box_from_image(image_path):
 #### Autres
 
 # Conversion en niveaux de gris
-def to_grayscale(img_path):
+def to_grayscale(img_path, normalize=False):
     img = Image.open(img_path).convert("L")
     # Passage en float32 pour diviser par 2 la mémoire sans perte notable de précision
-    img_gray = np.asarray(img, dtype=np.float32) / 255.0  # Normalisation entre 0 et 1
-    return img_gray
+    if normalize:
+        img = np.asarray(img, dtype=np.float32) / 255.0  # Normalisation entre 0 et 1
+    return img
