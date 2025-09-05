@@ -130,3 +130,6 @@ dmypy.json
 
 # Image files
 data/images/
+
+# Heavy preprocessed data files
+data/preprocessed/
