@@ -52,9 +52,9 @@ xgb = XGBClassifier(
 # 5️⃣ Define hyperparameter distribution for HalvingGridSearchCV
 # -----------------------------
 param_list = {
-    'n_estimators': [100, 200],
-    'max_depth': [3, 5, 6],
-    'learning_rate': [0.1, 0.2],
+    'n_estimators': [100, 200, 300],
+    'max_depth': [3, 5, 6, 7],
+    'learning_rate': [0.01, 0.1, 0.2],
 }
 
 # -----------------------------
@@ -70,7 +70,7 @@ search = HalvingGridSearchCV(
     verbose=2,
     factor=3,
     min_resources="exhaust",
-    aggressive_elimination=True
+    aggressive_elimination=False
 )
 
 # Fit grid search
