@@ -11,11 +11,11 @@ import matplotlib.image as mpimg
 # Image processing library
 from PIL import Image
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "..", "data")
+
 # Chargement des données
 def load_data():
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DATA_DIR = os.path.join(BASE_DIR, "..", "data")
-
     X_train = pd.read_csv(os.path.join(DATA_DIR, "X_train_update.csv"), index_col=0)
     y_train = pd.read_csv(os.path.join(DATA_DIR, "Y_train_CVw08PX.csv"), index_col=0)
     X_test  = pd.read_csv(os.path.join(DATA_DIR, "X_test_update.csv"), index_col=0)
@@ -23,15 +23,23 @@ def load_data():
 
 X_train, y_train, X_test = load_data()
 
+# Infos de bases des dataframes
+def data_info(df):
+    df.info()
+    print("\n")
+    display(df.head())
+    print("\n")
+
+
 #####################################
 ############ IMAGE UTILS ############
 #####################################
 
 # Paths
-image_train_path = "./../data/images/image_train/"
-image_test_path = "./../data/images/image_test/"
-image_gray_path_train = "./../data/images/gray_resized_images_train/"
-image_gray_path_test = "./../data/images/gray_resized_images_test/"
+image_train_path = os.path.join(DATA_DIR, "images/image_train/")
+image_test_path = os.path.join(DATA_DIR, "images/image_test/")
+image_gray_path_train = os.path.join(DATA_DIR, "images/gray_resized_images_train/")
+image_gray_path_test = os.path.join(DATA_DIR, "images/gray_resized_images_test/")
 
 #### Affichage des images
 
@@ -61,7 +69,7 @@ def find_image_gray_path(imageid, productid, split="train"):
 
 
 # Display an image from its path or an image objetc
-def display_image(image, print_dim=False):
+def display_image(image, print_dim=False, cmap='viridis'):
     if isinstance(image, str):
         img = mpimg.imread(image)
     else:
@@ -70,7 +78,7 @@ def display_image(image, print_dim=False):
     if print_dim:
         print(f"Image dimensions: {img.shape[0]}x{img.shape[1]} pixels")
 
-    plt.imshow(img)
+    plt.imshow(img, cmap=cmap)
     plt.axis("off")
     plt.show()
     return

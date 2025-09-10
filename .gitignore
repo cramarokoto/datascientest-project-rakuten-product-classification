@@ -130,9 +130,6 @@ dmypy.json
 
 # Image files
 data/images/
-data/gray_resized_images_train/
-data/gray_resized_images_test/
-data/images/
 
 # Heavy preprocessed data files
 data/preprocessed/

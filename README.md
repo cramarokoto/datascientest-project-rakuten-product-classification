@@ -51,7 +51,7 @@ pip install -r requirements.txt
 To run the app (be careful with the paths of the files in the app):
 
 ```shell
-conda create --name my-awesome-streamlit python=3.9
+conda create --name my-awesome-streamlit python=3.11
 conda activate my-awesome-streamlit
 pip install -r requirements.txt
 streamlit run app.py
