@@ -6,3 +6,4 @@ wordcloud
 scikit-learn
 imbalanced-learn
 seaborn
+xgboost
