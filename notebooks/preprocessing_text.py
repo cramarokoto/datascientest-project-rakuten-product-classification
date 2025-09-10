@@ -1,0 +1,200 @@
+# Utils
+import sys
+import os
+
+import pandas as pd
+import numpy as np
+from collections import Counter
+
+from sklearn.model_selection import train_test_split
+from sklearn.decomposition import TruncatedSVD
+
+from imblearn.pipeline import Pipeline
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.over_sampling import RandomOverSampler
+
+from scipy.sparse import hstack, csr_matrix
+
+# Traitement des variables textuelles
+from sklearn.feature_extraction.text import TfidfVectorizer
+import nltk
+nltk.download('punkt_tab')
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem.snowball import FrenchStemmer
+
+import joblib
+
+# Get path to project root (assuming notebook is in notebooks/)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.getcwd(), ".."))
+SCRIPTS_DIR = os.path.join(PROJECT_ROOT, "scripts")
+
+# Add to sys.path
+if SCRIPTS_DIR not in sys.path:
+    sys.path.append(SCRIPTS_DIR)
+from utils import load_data
+
+X, y, _ = load_data()
+
+# Split train/test
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+print("Train avant over et undersampling :")
+print(y_train['prdtypecode'].value_counts(normalize=True) * 100)
+
+# Calcul des effectifs
+counts = Counter(y_train['prdtypecode'])
+n_total = len(y_train)
+target_ratio = 0.06
+
+# Construction d'une sampling_strategy d'over et undersampling
+undersampling_strategy = {
+    2583: int(n_total * target_ratio)
+}
+oversampling_strategy = {}
+for cls, count in counts.items():
+    current_ratio = count / n_total
+    if current_ratio < target_ratio:
+        oversampling_strategy[cls] = int(n_total * target_ratio)
+
+# Application de l'over et undersampling avec un pipeline
+pipeline = Pipeline(steps=[
+    ('under', RandomUnderSampler(sampling_strategy=undersampling_strategy, random_state=42)),
+    ('over', RandomOverSampler(sampling_strategy=oversampling_strategy, random_state=42))
+])
+
+X_train, y_train = pipeline.fit_resample(X_train, y_train)
+
+print("\nTrain après over et undersampling :")
+print(y_train['prdtypecode'].value_counts(normalize=True) * 100)
+
+print("\nTest reste inchangé :")
+print(y_test['prdtypecode'].value_counts(normalize=True) * 100)
+
+# Stopwords
+
+html_stopwords = [
+    'html', 'head', 'body', 'div', 'span', 'p', 'br', 'a', 'img', 'ul', 'li', 'ol', 'table',
+    'tr', 'td', 'th', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'b', 'i', 'u', 'strong', 'em',
+    'eacute', 'agrave'
+]
+punctuation_words = [",", ".", "``", "@", "*", "(", ")", "...", "!", "?", "-", 
+                  "_", ">", "<", ":", "/", "=", "--", "©", "~", ";", "\\", "\\\\"]
+final_stopwords = stopwords.words('english') + stopwords.words('french') + html_stopwords + punctuation_words
+
+# Stemming and processing
+
+stemmer = FrenchStemmer()
+
+def stemming(mots) :
+    sortie = []
+    for string in mots :
+        radical = stemmer.stem(string)
+        if (radical not in sortie) : sortie.append(radical)
+    return sortie
+
+
+def preprocessing(text, with_stemming=False):
+    text = text.lower()
+    tokens = word_tokenize(text)
+    result = [word for word in tokens if word not in final_stopwords]
+    if with_stemming:
+        result = stemming(result)
+    return ' '.join(result)
+
+# Création de la variable has_description
+
+# Pour X_train
+X_train['has_description'] = X_train['description'].notnull() & (X_train['description'].str.strip() != "")
+X_train['has_description'] = X_train['has_description'].astype(int)
+
+# Pour X_test
+X_test['has_description'] = X_test['description'].notnull() & (X_test['description'].str.strip() != "")
+X_test['has_description'] = X_test['has_description'].astype(int)
+
+# Fusion des variables `designation` et `description` dans `full_description` 
+
+# Pour X_train
+X_train['full_description'] = (
+    X_train['designation'] + " " + X_train['description'].fillna('')
+).str.strip()
+# Nettoyage des colonnes inutiles
+X_train = X_train.drop(columns=['designation', 'description'])
+
+# Pour X_test
+X_test['full_description'] = (
+    X_test['designation'] + " " + X_test['description'].fillna('')
+).str.strip()
+# Nettoyage des colonnes inutiles
+X_test = X_test.drop(columns=['designation', 'description'])
+
+# Nettoyage, tokenisation et stemmatisation de la variable `full_description`
+
+result = pd.DataFrame(columns=['preprocessed_full_description', 'full_description'])
+
+for i in X_train.head(10).index:
+    current_description = X_train.loc[i, 'full_description']
+    result.loc[i, 'full_description'] = current_description
+    result.loc[i, 'preprocessed_full_description'] = preprocessing(current_description, with_stemming=True)
+
+display(result)
+# Le résultat n'est pas satisfaisant avec la stemmatisation donc on ne la conserve
+# pas pour la suite du preprocessing
+
+X_train['preprocessed_full_description'] = ""
+X_test['preprocessed_full_description'] = ""
+
+for i in X_train.index:
+    X_train.loc[i, 'preprocessed_full_description'] = preprocessing(X_train.loc[i, 'full_description'])
+
+for i in X_test.index:
+    X_test.loc[i, 'preprocessed_full_description'] = preprocessing(X_test.loc[i, 'full_description'])
+
+display(X_train[["full_description", "preprocessed_full_description"]].head(10))
+display(X_test[["full_description", "preprocessed_full_description"]].head(10))
+
+# TFIDF
+
+# Initialisation du vecteur TF-IDF
+tfidf = TfidfVectorizer(
+    max_features=10000,
+    ngram_range=(1,2),
+    min_df=5
+)
+
+# Apprentissage sur X_train et transformation
+X_train_tfidf = tfidf.fit_transform(X_train['preprocessed_full_description'])
+X_test_tfidf = tfidf.transform(X_test['preprocessed_full_description'])
+
+# Suppression des colones temporaires ou sans variance
+X_train = X_train.drop(columns=['preprocessed_full_description', 'full_description', 'productid', 'imageid'])
+X_test = X_test.drop(columns=['preprocessed_full_description', 'full_description', 'productid', 'imageid'])
+
+# Compression avec TruncatedSVD
+svd = TruncatedSVD(n_components=200, random_state=42)
+
+X_train_tfidf_svd = svd.fit_transform(X_train_tfidf)
+X_test_tfidf_svd = svd.transform(X_test_tfidf)
+
+# ⚠️ fit_transform() renvoie un tableau NumPy dense,
+# donc on repasse en sparse pour pouvoir concaténer avec hstack
+X_train_tfidf_svd = csr_matrix(X_train_tfidf_svd)
+X_test_tfidf_svd = csr_matrix(X_test_tfidf_svd)
+
+# Conversion des dataframes en matrice csr pour conserver le format sparse dense optimal avec hstack
+X_train_num = csr_matrix(X_train.values)
+X_test_num = csr_matrix(X_test.values)
+
+# Concaténation
+X_train = hstack([X_train_num, X_train_tfidf_svd])
+X_test = hstack([X_test_num, X_test_tfidf_svd])
+
+
+# Sauvegarde des données prétraitées dans des fichiers PKL
+
+joblib.dump(X_train, "../data/preprocessed/X_train_preprocessed.pkl")
+joblib.dump(y_train, "../data/preprocessed/y_train_preprocessed.pkl")
+joblib.dump(X_test, "../data/preprocessed/X_test_preprocessed.pkl")
+joblib.dump(y_test, "../data/preprocessed/y_test_preprocessed.pkl")
