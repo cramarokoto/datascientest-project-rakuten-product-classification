@@ -1,4 +1,4 @@
-from utils import *
+from scripts.utils import *
 
 def prepare_first_images_df(df_X, n_images=1000, random_state=42):
     """

@@ -1,3 +1,5 @@
+import os
+
 # Data analysis libraries
 import pandas as pd
 import numpy as np
@@ -10,9 +12,16 @@ import matplotlib.image as mpimg
 from PIL import Image
 
 # Chargement des données
-X_train = pd.read_csv("./../data/X_train_update.csv", index_col=0)
-y_train = pd.read_csv("./../data/Y_train_CVw08PX.csv", index_col=0)
-X_test = pd.read_csv("./../data/X_test_update.csv", index_col=0)
+def load_data():
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_DIR = os.path.join(BASE_DIR, "..", "data")
+
+    X_train = pd.read_csv(os.path.join(DATA_DIR, "X_train_update.csv"), index_col=0)
+    y_train = pd.read_csv(os.path.join(DATA_DIR, "Y_train_CVw08PX.csv"), index_col=0)
+    X_test  = pd.read_csv(os.path.join(DATA_DIR, "X_test_update.csv"), index_col=0)
+    return X_train, y_train, X_test
+
+X_train, y_train, X_test = load_data()
 
 #####################################
 ############ IMAGE UTILS ############
