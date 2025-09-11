@@ -11,6 +11,13 @@ import matplotlib.image as mpimg
 # Image processing library
 from PIL import Image
 
+# Sampling libraries
+from collections import Counter
+from imblearn.pipeline import Pipeline
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.over_sampling import RandomOverSampler
+
+# Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "..", "data")
 
@@ -41,7 +48,7 @@ image_test_path = os.path.join(DATA_DIR, "images/image_test/")
 image_gray_path_train = os.path.join(DATA_DIR, "images/gray_resized_images_train/")
 image_gray_path_test = os.path.join(DATA_DIR, "images/gray_resized_images_test/")
 
-#### Affichage des images
+#### Displaying of images
 
 # Find a picture path from its imageid and its productid
 def image_path(imageid, productid, split="train"):
@@ -110,7 +117,7 @@ def display_image_from_row(index_or_row_number, split="train", is_index=True, pr
         display_image_df(df.iloc[index_or_row_number, 3], df.iloc[index_or_row_number, 2], split, print_dim)
     return
 
-#### Format d'images
+#### Images format
 def shape_from_path(image_path):
     img = mpimg.imread(image_path)
     return img.shape
@@ -193,3 +200,71 @@ def to_grayscale(img_path, normalize=False):
     if normalize:
         img = np.asarray(img, dtype=np.float32) / 255.0  # Normalisation entre 0 et 1
     return img
+
+
+def prepare_images_df(df_X, n_images=None, split="train", random_state=42):
+    """
+    Prepare a dataframe with a sample of n_images and their image paths.
+    """
+    if n_images is None:
+        X_img_sample = df_X.copy()
+    else:
+        X_img_sample = df_X.sample(n=n_images, random_state=random_state)
+
+    X_img_sample["image_path"] = X_img_sample.apply(lambda row: image_path(row["imageid"], row["productid"], split), axis=1)
+    X_img_sample["processed_image_path"] = X_img_sample.apply(lambda row: find_image_gray_path(row["imageid"], row["productid"], split), axis=1)
+    X_img_sample = X_img_sample[["image_path", "processed_image_path"]]
+    return X_img_sample
+
+
+def adding_content_box(df_sample):
+    """
+    Add content box information to a dataframe with image paths.
+    """
+    df_content_box = df_sample["image_path"].apply(get_content_box).apply(pd.Series)
+    df_content_box.columns = ["content_dim", "x_min", "y_min", "x_max", "y_max"]
+
+    df_sample["content_dim"] = df_content_box["content_dim"]
+    df_sample[["content_width", "content_height"]] = df_sample["content_dim"].apply(pd.Series)
+    df_sample[["x_min", "y_min", "x_max", "y_max"]] = df_content_box[["x_min", "y_min", "x_max", "y_max"]]
+    
+    df_sample["content_ratio"] = np.round(df_sample["content_width"] / df_sample["content_height"], 4)
+
+    return df_sample
+
+
+#####################################
+############# SAMPLING ##############
+#####################################
+
+
+def dataset_sampler_under_oversampling(X_train, y_train):
+    # print("Train before over and undersampling :")
+    # print(y_train['prdtypecode'].value_counts(normalize=True) * 100)
+
+    # Calcul des effectifs
+    counts = Counter(y_train['prdtypecode'])
+    n_total = len(y_train)
+    target_ratio = 0.06
+
+    # Construction d'une sampling_strategy d'over et undersampling
+    undersampling_strategy = {
+        2583: int(n_total * target_ratio)
+    }
+    oversampling_strategy = {}
+    for cls, count in counts.items():
+        current_ratio = count / n_total
+        if current_ratio < target_ratio:
+            oversampling_strategy[cls] = int(n_total * target_ratio)
+
+    # Application de l'over et undersampling avec un pipeline
+    pipeline = Pipeline(steps=[
+        ('under', RandomUnderSampler(sampling_strategy=undersampling_strategy, random_state=42)),
+        ('over', RandomOverSampler(sampling_strategy=oversampling_strategy, random_state=42))
+    ])
+
+    X_train, y_train = pipeline.fit_resample(X_train, y_train)
+
+    # print("\nTrain after over and undersampling :")
+    # print(y_train['prdtypecode'].value_counts(normalize=True) * 100)
+    return X_train, y_train
