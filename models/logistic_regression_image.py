@@ -15,29 +15,24 @@ from sklearn.metrics import classification_report, confusion_matrix
 
 
 # -----------------------------
-# Load sampled data
+# Load sampled data and split train/test
 # -----------------------------
 def load_sampled_paths_data():
     print("Loading data (x, y)")
     X, y, _ = load_data()
-    X_sampled, y_sampled = dataset_sampler_under_oversampling(X, y)
-    X_sampled = prepare_images_df(X_sampled, n_images=None, split="train", random_state=42)
-
-    df = X_sampled.merge(y_sampled, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
-
-    return X_sampled, y_sampled, df
-
-
-# -----------------------------
-# Split train/test
-# -----------------------------
-def splitting_data(df, test_size=0.2, random_state=42):
-    print("Splitting data into train/test")
-    train_df, test_df = train_test_split(
-        df, test_size=test_size, random_state=random_state, stratify=df["prdtypecode"]
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
     )
+    X_train_sampled, y_train_sampled = dataset_sampler_under_oversampling(X_train, y_train)
+    X_train_sampled = prepare_images_df(X_train_sampled, n_images=None, split="train", random_state=42)
 
-    return train_df, test_df
+    X_test = prepare_images_df(X_test, n_images=None, split="test", random_state=42)
+
+    train_sampled_df = X_train_sampled.merge(y_train_sampled, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
+
+    test_df = X_test.merge(y_test, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
+
+    return train_sampled_df, test_df
 
 # -----------------------------
 # Batching images and Reduce dimensionality with Incremental PCA 
@@ -70,7 +65,6 @@ def fit_incremental_pca(train_df, n_components=256, batch_size=512):
     # Learn components in 1st pass
     for X_batch in iter_batches_from_disk(train_df, batch_size):
         ipca.partial_fit(X_batch)
-
     
     # Timer
     end_time = time.time()
@@ -196,29 +190,20 @@ def save_model_and_results(search_model, X_test_red, y_test_enc):
 def whole_process_and_training():
     # Prepare data
     print("### Preparing data")
-    X_sampled, y_sampled, df = load_sampled_paths_data()
-    train_df, test_df = splitting_data(df)
-    y_train_enc, y_test_enc, label_map, inverse_map, le = encoding_labels(train_df, test_df)
+    train_sampled_df, test_df = load_sampled_paths_data()
+    y_train_enc, y_test_enc, label_map, inverse_map, le = encoding_labels(train_sampled_df, test_df)
     joblib.dump(le, './models/labelEncoder_image_logreg.pkl')
     print("Encoded y shapes:", y_train_enc.shape, y_test_enc.shape)
 
     # Fit IncrementalPCA and reduce dimensionality
     print("### Fitting IncrementalPCA and reducing dimensionality")
-    ipca = fit_incremental_pca(train_df, n_components=256, batch_size=512)
-    X_train_red = reduce_dimensionality(ipca, train_df, batch_size=512)
+    ipca = fit_incremental_pca(train_sampled_df, n_components=256, batch_size=512)
+    X_train_red = reduce_dimensionality(ipca, train_sampled_df, batch_size=512)
+    joblib.dump(X_train_red, './data/images/X_train_reduced_image_logreg.pkl')
     print("Reduced X train shape:", X_train_red.shape)
     X_test_red = reduce_dimensionality(ipca, test_df, batch_size=512)
+    joblib.dump(X_test_red, './data/images/X_test_reduced_image_logreg.pkl')
     print("Reduced X_test shape:", X_test_red.shape)
-
-    # If you have done the preparation aldreay, comment before and uncomment the next line
-    # X_sampled, y_sampled, df = load_sampled_paths_data()
-    # train_df, test_df = splitting_data(df)
-    # le = joblib.load('./models/labelEncoder_image_logreg.pkl')
-    # y_train_enc = le.transform(train_df["prdtypecode"])
-    # y_test_enc = le.transform(test_df["prdtypecode"])
-    # ipca = joblib.load('./models/ipca_for_image_logreg.pkl')
-    # X_train_red = reduce_dimensionality(ipca, train_df, batch_size=512)
-    # X_test_red = reduce_dimensionality(ipca, test_df, batch_size=512)
 
     # Grid Search with Halving
     print("### Starting Halving Grid Search")
@@ -226,6 +211,7 @@ def whole_process_and_training():
 
     # Save model and results
     print("### Saving model and results")
+
     report = save_model_and_results(search_model, X_test_red, y_test_enc)
 
     # If everything worked, we can save everything in one file
@@ -233,29 +219,25 @@ def whole_process_and_training():
         "label_encoder": le,
         "ipca": ipca,
         "model": search_model.best_estimator_,
-        "report": report
+        "report": report, 
+        "fit_time": search_model.refit_time_
     }, './models/logistic_regression_image_full_data.pkl')
 
     print("\nMy job here is done.")
+    return
 
-    # just have to jump.load the preprocessed data next time
 
-
-if __name__ == "__main__":
-    
-    X_sampled, y_sampled, df = load_sampled_paths_data()
-    train_df, test_df = splitting_data(df)
+def process_if_already_done():
+    train_sampled_df, test_df = load_sampled_paths_data()
 
     full_data = joblib.load("./models/logistic_regression_image_full_data.pkl")
 
     le = full_data["label_encoder"]
-    y_train_enc = le.fit(train_df["prdtypecode"])
+    y_train_enc = le.trasnform(train_sampled_df["prdtypecode"])
     y_test_enc = le.transform(test_df["prdtypecode"])
 
     X_train_red = full_data["X_train_red"]
     X_test_red = full_data["X_test_red"]
-    # X_train_red = reduce_dimensionality(ipca, train_df, batch_size=512)
-    # X_test_red = reduce_dimensionality(ipca, test_df, batch_size=512)
 
     best_model = full_data["model"]
     print("Best model:", best_model)
@@ -288,5 +270,10 @@ if __name__ == "__main__":
     }, './models/logistic_regression_image_full_data.pkl')
 
     print("\nMy job here is done.")
+
+
+if __name__ == "__main__":
+    whole_process_and_training()
+    # process_if_already_done()  # Uncomment it's not the first run
     
 
