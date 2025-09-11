@@ -20,7 +20,7 @@ y_train_val = joblib.load("./data/preprocessed/y_train_preprocessed.pkl").values
 y_test = joblib.load("./data/preprocessed/y_test_preprocessed.pkl").values.ravel()
 
 # -----------------------------
-# 2️⃣ Split train into train + validation
+# 2️⃣ Split train into train + validation for early stopping rounds on best estimator
 # -----------------------------
 X_train, X_val, y_train, y_val = train_test_split(
     X_train_val,
@@ -87,12 +87,21 @@ print("Best hyperparameters :", best_params)
 # 8️⃣ Train final model
 # -----------------------------
 print("Training final model with best hyperparameters")
-best_estimator = search.best_estimator_
+
+# Recreate the estimator because of HalvingGridSearch wrapper bug blocking kwargs on best_estimator_
+best_estimator = final_model = XGBClassifier(
+    **best_params,
+    eval_metric='mlogloss',
+    random_state=42,
+    tree_method='hist',
+    n_jobs=-1,
+    early_stopping_rounds=10
+)
+
 best_estimator.fit(
     X_train,
     y_train_enc,
-    eval_set=[(X_val, y_val_enc)],
-    verbose=True
+    eval_set=[(X_val, y_val_enc)]
 )
 
 end_time = time.time()
@@ -108,4 +117,4 @@ y_pred_enc = best_estimator.predict(X_test)
 y_pred = le.inverse_transform(y_pred_enc)
 
 export_model('xgboost', best_estimator)
-export_classification_reports('xgboost', y_pred, y_test, best_params, elapsed_formatted)
+export_classification_reports('xgboost', y_pred, y_test, best_params, param_list, elapsed_formatted)

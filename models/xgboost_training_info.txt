@@ -1,0 +1,2 @@
+Execution time : Temps total d'exécution : 733.85 secondes (12.23 minutes)
+Best params : {'learning_rate': 0.2, 'max_depth': 6, 'n_estimators': 200}

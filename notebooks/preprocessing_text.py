@@ -155,8 +155,8 @@ display(X_test[["full_description", "preprocessed_full_description"]].head(10))
 # Initialisation du vecteur TF-IDF
 tfidf = TfidfVectorizer(
     max_features=10000,
-    ngram_range=(1,2),
-    min_df=5
+    ngram_range=(1,1),
+    min_df=10
 )
 
 # Apprentissage sur X_train et transformation
@@ -189,7 +189,7 @@ X_test = hstack([X_test_num, X_test_tfidf_svd])
 
 # Sauvegarde des données prétraitées dans des fichiers PKL
 
-joblib.dump(X_train, "../data/preprocessed/X_train_preprocessed.pkl")
-joblib.dump(y_train, "../data/preprocessed/y_train_preprocessed.pkl")
-joblib.dump(X_test, "../data/preprocessed/X_test_preprocessed.pkl")
-joblib.dump(y_test, "../data/preprocessed/y_test_preprocessed.pkl")
+joblib.dump(X_train, "./data/preprocessed/X_train_preprocessed.pkl")
+joblib.dump(y_train, "./data/preprocessed/y_train_preprocessed.pkl")
+joblib.dump(X_test, "./data/preprocessed/X_test_preprocessed.pkl")
+joblib.dump(y_test, "./data/preprocessed/y_test_preprocessed.pkl")

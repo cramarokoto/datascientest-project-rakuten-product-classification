@@ -280,20 +280,21 @@ def dataset_sampler_under_oversampling(X_train, y_train):
 ############# EXPORTS ###############
 #####################################
 
-def export_classification_reports(model_name, y_pred, y_test, best_params, elapsed_formatted):
+def export_classification_reports(model_name, y_pred, y_test, best_params, search_params, elapsed_formatted):
     """
     Saves classification results to the './models/' directory.
 
     This function exports the following files:
         - '{model_name}_classification_report.txt': Text classification report comparing y_test and y_pred.
         - '{model_name}_confusion_matrix.txt': Confusion matrix comparing y_test and y_pred.
-        - '{model_name}_training_info.txt': Training information including execution time and best parameters.
+        - '{model_name}_training_info.txt': Training information including execution time and search/best parameters.
 
     Args:
         model_name (str): The name to use for the saved files.
         y_pred (array-like): Predicted labels from the classifier.
         y_test (array-like): True labels for the test set.
         best_params (dict or str): Best hyperparameters found during model selection.
+        search_params (dict or str): Search hyperparameters used during model selection.
         elapsed_formatted (str): Formatted string representing the training execution time.
 
     Returns:
@@ -309,6 +310,7 @@ def export_classification_reports(model_name, y_pred, y_test, best_params, elaps
     with open(f'./models/{model_name}_training_info.txt', 'w') as f:
         f.write('Execution time : ' + str(elapsed_formatted) + '\n')
         f.write('Best params : ' + str(best_params) + '\n')
+        f.write('Search params : ' + str(search_params) + '\n')
 
 def export_model(model, model_name):
     """
