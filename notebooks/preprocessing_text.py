@@ -2,6 +2,8 @@
 import sys
 import os
 
+from IPython.display import display
+
 import pandas as pd
 import numpy as np
 from collections import Counter
@@ -25,14 +27,7 @@ from nltk.stem.snowball import FrenchStemmer
 
 import joblib
 
-# Get path to project root (assuming notebook is in notebooks/)
-PROJECT_ROOT = os.path.abspath(os.path.join(os.getcwd(), ".."))
-SCRIPTS_DIR = os.path.join(PROJECT_ROOT, "scripts")
-
-# Add to sys.path
-if SCRIPTS_DIR not in sys.path:
-    sys.path.append(SCRIPTS_DIR)
-from utils import load_data
+from scripts.utils import load_data
 
 X, y, _ = load_data()
 
