@@ -28,8 +28,19 @@ from imblearn.over_sampling import RandomOverSampler
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "..", "data")
 
-# Chargement des données
 def load_data():
+    """
+    Loads Rakuten data challenge training and test datasets from raw CSV files located in the DATA_DIR directory.
+
+    Returns:
+        tuple:
+            - X_train (pd.DataFrame): Features for the training set.
+            - y_train (pd.DataFrame): Target labels for the training set.
+            - X_test (pd.DataFrame): Features for the challenge test set without labels.
+
+    Note:
+        Assumes that DATA_DIR is defined and that the required CSV files exist in this directory.
+    """
     X_train = pd.read_csv(os.path.join(DATA_DIR, "X_train_update.csv"), index_col=0)
     y_train = pd.read_csv(os.path.join(DATA_DIR, "Y_train_CVw08PX.csv"), index_col=0)
     X_test  = pd.read_csv(os.path.join(DATA_DIR, "X_test_update.csv"), index_col=0)
@@ -37,8 +48,16 @@ def load_data():
 
 X_train, y_train, X_test = load_data()
 
-# Infos de bases des dataframes
 def data_info(df):
+    """
+    Displays basic information about a pandas DataFrame, including its structure and the first few rows.
+
+    Parameters:
+        df (pandas.DataFrame): The DataFrame to display information about.
+
+    Returns:
+        None
+    """
     df.info()
     print("\n")
     display(df.head())
