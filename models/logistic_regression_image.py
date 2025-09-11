@@ -249,7 +249,7 @@ if __name__ == "__main__":
     full_data = joblib.load("./models/logistic_regression_image_full_data.pkl")
 
     le = full_data["label_encoder"]
-    y_train_enc = le.fit_transform(train_df["prdtypecode"])
+    y_train_enc = le.fit(train_df["prdtypecode"])
     y_test_enc = le.transform(test_df["prdtypecode"])
 
     X_train_red = full_data["X_train_red"]
