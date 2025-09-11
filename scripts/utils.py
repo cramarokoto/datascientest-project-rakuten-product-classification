@@ -1,8 +1,15 @@
 import os
 
+# Models or object serialization
+import joblib
+
 # Data analysis libraries
 import pandas as pd
+from sklearn.metrics import classification_report, confusion_matrix
 import numpy as np
+
+# IPython Notebook magic
+from IPython.display import display
 
 # Data visualization libraries
 import matplotlib.pyplot as plt
@@ -268,3 +275,55 @@ def dataset_sampler_under_oversampling(X_train, y_train):
     # print("\nTrain after over and undersampling :")
     # print(y_train['prdtypecode'].value_counts(normalize=True) * 100)
     return X_train, y_train
+
+#####################################
+############# EXPORTS ###############
+#####################################
+
+def export_classification_reports(model_name, y_pred, y_test, best_params, elapsed_formatted):
+    """
+    Saves classification results to the './models/' directory.
+
+    This function exports the following files:
+        - '{model_name}_classification_report.txt': Text classification report comparing y_test and y_pred.
+        - '{model_name}_confusion_matrix.txt': Confusion matrix comparing y_test and y_pred.
+        - '{model_name}_training_info.txt': Training information including execution time and best parameters.
+
+    Args:
+        model_name (str): The name to use for the saved files.
+        y_pred (array-like): Predicted labels from the classifier.
+        y_test (array-like): True labels for the test set.
+        best_params (dict or str): Best hyperparameters found during model selection.
+        elapsed_formatted (str): Formatted string representing the training execution time.
+
+    Returns:
+        None
+    """
+    print("Saving classification report")
+    with open(f'./models/{model_name}_classification_report.txt', 'w') as f:
+        f.write(classification_report(y_test, y_pred))
+
+    with open(f'./models/{model_name}_confusion_matrix.txt', 'w') as f:
+        f.write(str(confusion_matrix(y_test, y_pred)))
+
+    with open(f'./models/{model_name}_training_info.txt', 'w') as f:
+        f.write('Execution time : ' + str(elapsed_formatted) + '\n')
+        f.write('Best params : ' + str(best_params) + '\n')
+
+def export_model(model, model_name):
+    """
+    Exports the given model to a file using joblib.
+
+    Args:
+        model: The trained model object to be saved.
+        model_name (str): The name to use for the saved model file.
+
+    Returns:
+        None
+
+    Side Effects:
+        Saves the model to './models/{model_name}_model.pkl'.
+
+    """
+    print("Saving model")
+    joblib.dump(model, './models/#{model_name}_model.pkl')

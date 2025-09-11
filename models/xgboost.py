@@ -2,8 +2,8 @@ import time
 
 import pandas as pd
 import numpy as np
+from scripts.utils import export_classification_reports, export_model
 from xgboost import XGBClassifier
-from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import train_test_split, HalvingGridSearchCV
@@ -97,24 +97,15 @@ best_estimator.fit(
 
 end_time = time.time()
 elapsed = end_time - start_time
-print(f"Temps total d'exécution : {elapsed:.2f} secondes ({elapsed/60:.2f} minutes)")
+elapsed_formatted = f"Temps total d'exécution : {elapsed:.2f} secondes ({elapsed/60:.2f} minutes)"
+print(elapsed_formatted)
 
 # -----------------------------
-# 9️⃣ Evaluate on test set
+# 9️⃣ Evaluate on test set and save results
 # -----------------------------
 print("Evaluating on test set")
 y_pred_enc = best_estimator.predict(X_test)
 y_pred = le.inverse_transform(y_pred_enc)
 
-report = classification_report(y_test, y_pred, output_dict=True)
-print("Classification Report:\n", report)
-print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
-
-# -----------------------------
-# 🔟 Save the model and classification report
-# -----------------------------
-print("Saving model and classification report")
-joblib.dump(best_estimator, './models/xgboost_model.pkl')
-
-with open('./models/xgboost_classification_report.txt', 'w') as f:
-    f.write(classification_report(y_test, y_pred))
+export_model('xgboost', best_estimator)
+export_classification_reports('xgboost', y_pred, y_test, best_params, elapsed_formatted)
