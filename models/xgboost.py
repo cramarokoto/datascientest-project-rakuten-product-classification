@@ -45,7 +45,8 @@ xgb = XGBClassifier(
     eval_metric='mlogloss',
     random_state=42,
     tree_method='hist',
-    n_jobs=1
+    n_jobs=1,
+    early_stopping_rounds=10
 )
 
 # -----------------------------
@@ -67,7 +68,6 @@ search = HalvingGridSearchCV(
     scoring='f1_weighted',
     cv=3,
     n_jobs=-1,
-    verbose=2,
     factor=3,
     min_resources="exhaust",
     aggressive_elimination=False
@@ -75,7 +75,7 @@ search = HalvingGridSearchCV(
 
 # Fit grid search
 start_time = time.time()
-search.fit(X_train, y_train_enc)
+search.fit(X_train, y_train_enc, eval_set=[(X_val, y_val_enc)])
 
 # -----------------------------
 # 7️⃣ Best hyperparameters
@@ -89,15 +89,7 @@ print("Best hyperparameters :", best_params)
 print("Training final model with best hyperparameters")
 
 # Recreate the estimator because of HalvingGridSearch wrapper bug blocking kwargs on best_estimator_
-best_estimator = final_model = XGBClassifier(
-    **best_params,
-    eval_metric='mlogloss',
-    random_state=42,
-    tree_method='hist',
-    n_jobs=-1,
-    early_stopping_rounds=10
-)
-
+best_estimator = search.best_estimator_
 best_estimator.fit(
     X_train,
     y_train_enc,

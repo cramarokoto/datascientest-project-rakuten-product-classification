@@ -347,4 +347,4 @@ def export_model(model, model_name):
 
     """
     print("Saving model")
-    joblib.dump(model, './models/#{model_name}_model.pkl')
+    joblib.dump(model, f'./models/{model_name}_model.pkl')
