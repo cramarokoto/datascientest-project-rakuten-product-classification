@@ -2,22 +2,18 @@ import time
 
 import pandas as pd
 import numpy as np
-from scripts.utils import export_classification_reports, export_model
+from scripts.utils import export_classification_reports, export_model, load_preprocessed_text_data
 from xgboost import XGBClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import train_test_split, HalvingGridSearchCV
-import joblib
 
 # -----------------------------
 # 1️⃣ Load preprocessed data
 # -----------------------------
-print("Loading preprocessed data")
-X_train_val = joblib.load("./data/preprocessed/X_train_preprocessed.pkl")
-X_test = joblib.load("./data/preprocessed/X_test_preprocessed.pkl")
-
-y_train_val = joblib.load("./data/preprocessed/y_train_preprocessed.pkl").values.ravel()
-y_test = joblib.load("./data/preprocessed/y_test_preprocessed.pkl").values.ravel()
+X_train_val, X_test, y_train_val, y_test = load_preprocessed_text_data()
+y_train_val = y_train_val.values.ravel()
+y_test = y_test.values.ravel()
 
 # -----------------------------
 # 2️⃣ Split train into train + validation for early stopping rounds on best estimator

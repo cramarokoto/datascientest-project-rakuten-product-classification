@@ -48,6 +48,35 @@ def load_data():
 
 X_train, y_train, X_test = load_data()
 
+def load_preprocessed_text_data():
+    """
+    Loads preprocessed training and test datasets for text classification.
+
+    Returns:
+        tuple: A tuple containing four elements:
+            - X_train_val (csr matrix): Preprocessed features for training and validation.
+            - X_test (csr matrix): Preprocessed features for testing.
+            - y_train_val (csr matrix): True labels for training and validation.
+            - y_test (csr matrix): True labels for testing.
+
+    The function expects the following files to exist in the './data/preprocessed/' directory:
+        - X_train_preprocessed.pkl
+        - X_test_preprocessed.pkl
+        - y_train_preprocessed.pkl
+        - y_test_preprocessed.pkl
+
+    Raises:
+        FileNotFoundError: If any of the required files are missing.
+    """
+    print("Loading preprocessed data")
+    X_train_val = joblib.load(os.path.join(DATA_DIR, "./data/preprocessed/X_train_preprocessed.pkl"))
+    X_test = joblib.load(os.path.join(DATA_DIR, "./data/preprocessed/X_test_preprocessed.pkl"))
+
+    y_train_val = joblib.load(os.path.join(DATA_DIR, "./data/preprocessed/y_train_preprocessed.pkl"))
+    y_test = joblib.load(os.path.join(DATA_DIR, "./data/preprocessed/y_test_preprocessed.pkl"))
+    return X_train_val, X_test, y_train_val, y_test
+
+
 def data_info(df):
     """
     Displays basic information about a pandas DataFrame, including its structure and the first few rows.
