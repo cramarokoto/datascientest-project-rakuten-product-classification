@@ -1,8 +1,15 @@
 import os
 
+# Models or object serialization
+import joblib
+
 # Data analysis libraries
 import pandas as pd
+from sklearn.metrics import classification_report, confusion_matrix
 import numpy as np
+
+# IPython Notebook magic
+from IPython.display import display
 
 # Data visualization libraries
 import matplotlib.pyplot as plt
@@ -21,8 +28,19 @@ from imblearn.over_sampling import RandomOverSampler
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "..", "data")
 
-# Chargement des données
 def load_data():
+    """
+    Loads Rakuten data challenge training and test datasets from raw CSV files located in the DATA_DIR directory.
+
+    Returns:
+        tuple:
+            - X_train (pd.DataFrame): Features for the training set.
+            - y_train (pd.DataFrame): Target labels for the training set.
+            - X_test (pd.DataFrame): Features for the challenge test set without labels.
+
+    Note:
+        Assumes that DATA_DIR is defined and that the required CSV files exist in this directory.
+    """
     X_train = pd.read_csv(os.path.join(DATA_DIR, "X_train_update.csv"), index_col=0)
     y_train = pd.read_csv(os.path.join(DATA_DIR, "Y_train_CVw08PX.csv"), index_col=0)
     X_test  = pd.read_csv(os.path.join(DATA_DIR, "X_test_update.csv"), index_col=0)
@@ -30,8 +48,16 @@ def load_data():
 
 X_train, y_train, X_test = load_data()
 
-# Infos de bases des dataframes
 def data_info(df):
+    """
+    Displays basic information about a pandas DataFrame, including its structure and the first few rows.
+
+    Parameters:
+        df (pandas.DataFrame): The DataFrame to display information about.
+
+    Returns:
+        None
+    """
     df.info()
     print("\n")
     display(df.head())
@@ -268,3 +294,57 @@ def dataset_sampler_under_oversampling(X_train, y_train):
     # print("\nTrain after over and undersampling :")
     # print(y_train['prdtypecode'].value_counts(normalize=True) * 100)
     return X_train, y_train
+
+#####################################
+############# EXPORTS ###############
+#####################################
+
+def export_classification_reports(model_name, y_pred, y_test, best_params, search_params, elapsed_formatted):
+    """
+    Saves classification results to the './models/' directory.
+
+    This function exports the following files:
+        - '{model_name}_classification_report.txt': Text classification report comparing y_test and y_pred.
+        - '{model_name}_confusion_matrix.txt': Confusion matrix comparing y_test and y_pred.
+        - '{model_name}_training_info.txt': Training information including execution time and search/best parameters.
+
+    Args:
+        model_name (str): The name to use for the saved files.
+        y_pred (array-like): Predicted labels from the classifier.
+        y_test (array-like): True labels for the test set.
+        best_params (dict or str): Best hyperparameters found during model selection.
+        search_params (dict or str): Search hyperparameters used during model selection.
+        elapsed_formatted (str): Formatted string representing the training execution time.
+
+    Returns:
+        None
+    """
+    print("Saving classification report")
+    with open(f'./models/{model_name}_classification_report.txt', 'w') as f:
+        f.write(classification_report(y_test, y_pred))
+
+    with open(f'./models/{model_name}_confusion_matrix.txt', 'w') as f:
+        f.write(str(confusion_matrix(y_test, y_pred)))
+
+    with open(f'./models/{model_name}_training_info.txt', 'w') as f:
+        f.write('Execution time : ' + str(elapsed_formatted) + '\n')
+        f.write('Best params : ' + str(best_params) + '\n')
+        f.write('Search params : ' + str(search_params) + '\n')
+
+def export_model(model, model_name):
+    """
+    Exports the given model to a file using joblib.
+
+    Args:
+        model: The trained model object to be saved.
+        model_name (str): The name to use for the saved model file.
+
+    Returns:
+        None
+
+    Side Effects:
+        Saves the model to './models/{model_name}_model.pkl'.
+
+    """
+    print("Saving model")
+    joblib.dump(model, f'./models/{model_name}_model.pkl')
