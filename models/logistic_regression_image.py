@@ -26,7 +26,7 @@ def load_sampled_paths_data():
     X_train_sampled, y_train_sampled = dataset_sampler_under_oversampling(X_train, y_train)
     X_train_sampled = prepare_images_df(X_train_sampled, n_images=None, split="train", random_state=42)
 
-    X_test = prepare_images_df(X_test, n_images=None, split="test", random_state=42)
+    X_test = prepare_images_df(X_test, n_images=None, split="train", random_state=42)
 
     train_sampled_df = X_train_sampled.merge(y_train_sampled, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
 
@@ -197,10 +197,14 @@ def whole_process_and_training():
 
     # Fit IncrementalPCA and reduce dimensionality
     print("### Fitting IncrementalPCA and reducing dimensionality")
-    ipca = fit_incremental_pca(train_sampled_df, n_components=256, batch_size=512)
-    X_train_red = reduce_dimensionality(ipca, train_sampled_df, batch_size=512)
-    joblib.dump(X_train_red, './data/images/X_train_reduced_image_logreg.pkl')
-    print("Reduced X train shape:", X_train_red.shape)
+    
+    # ipca = fit_incremental_pca(train_sampled_df, n_components=256, batch_size=512)
+    # X_train_red = reduce_dimensionality(ipca, train_sampled_df, batch_size=512)
+    # joblib.dump(X_train_red, './data/images/X_train_reduced_image_logreg.pkl')
+    # print("Reduced X train shape:", X_train_red.shape)
+
+    ipca = joblib.load("./models/ipca_for_image_logreg.pkl")
+    X_train_red = joblib.load('./data/images/X_train_reduced_image_logreg.pkl')
     X_test_red = reduce_dimensionality(ipca, test_df, batch_size=512)
     joblib.dump(X_test_red, './data/images/X_test_reduced_image_logreg.pkl')
     print("Reduced X_test shape:", X_test_red.shape)
