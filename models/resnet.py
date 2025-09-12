@@ -1,6 +1,8 @@
 import time
 
-from scripts.utils import find_image_gray_path, load_data, export_classification_reports, export_model
+import numpy as np
+
+from scripts.utils import image_path, load_data, export_classification_reports, export_model
 
 import torch
 import torch.nn as nn
@@ -12,6 +14,29 @@ import torchvision.io
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+
+
+class EarlyStopper:
+    def __init__(self, patience=5, min_delta=0.0):
+        """
+        Args:
+            patience (int): how many epochs to wait without improvement
+            min_delta (float): minimum change to qualify as improvement
+        """
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.best_loss = np.inf
+        self.early_stop = False
+
+    def __call__(self, val_loss):
+        if val_loss < self.best_loss - self.min_delta:
+            self.best_loss = val_loss
+            self.counter = 0
+        else:
+            self.counter += 1
+            if self.counter >= self.patience:
+                self.early_stop = True
 
 class ProductDataset(Dataset):
     def __init__(self, df, y_enc, split, transform=None):
@@ -26,18 +51,14 @@ class ProductDataset(Dataset):
     def __getitem__(self, idx):
         img_id = self.df.loc[idx, "imageid"]
         productid = self.df.loc[idx, "productid"]
-        img_path = find_image_gray_path(img_id, productid, self.split)
-        img = torchvision.io.read_image(img_path, mode=torchvision.io.ImageReadMode.GRAY)
+        img_path = image_path(img_id, productid, self.split)
+        img = torchvision.io.read_image(img_path, mode=torchvision.io.ImageReadMode.RGB)
 
         if self.transform:
             img = self.transform(img)
 
         label = self.y[idx]
         return img, label
-
-class RepeatChannels:
-    def __call__(self, img):
-        return img.repeat(3, 1, 1) # grayscale -> 3 channels
 
 def main():
     # -----------------------------
@@ -77,7 +98,6 @@ def main():
     # -----------------------------
     transformations = transforms.Compose([
         transforms.Resize((224,224)), # Size expected by the model
-        RepeatChannels(), 
         transforms.ConvertImageDtype(torch.float32),
         transforms.Normalize([0.485, 0.456, 0.406],
                             [0.229, 0.224, 0.225])
@@ -112,6 +132,7 @@ def main():
     EPOCHS = 5
     print("Starting training")
     start_time = time.time()
+    early_stopper = EarlyStopper(patience=2, min_delta=0.001)
 
     for epoch in range(EPOCHS):
         model.train()
@@ -136,17 +157,26 @@ def main():
 
         # Validation
         model.eval()
+        val_loss = 0.0
         val_correct, val_total = 0, 0
         with torch.no_grad():
             for imgs, labels in val_loader:
                 imgs, labels = imgs.to(device), labels.to(device)
                 outputs = model(imgs)
                 _, predicted = outputs.max(1)
+                val_loss += loss.item()
                 val_correct += (predicted == labels).sum().item()
                 val_total += labels.size(0)
+        val_loss /= len(val_loader)
         val_acc = val_correct / val_total
 
-        print(f"Epoch {epoch+1}/{EPOCHS} - Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
+        print(f"Epoch {epoch+1}/{EPOCHS} - Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
+
+        # check early stopping
+        early_stopper(val_loss)
+        if early_stopper.early_stop:
+            print("Early stopping triggered 🚦")
+            break
 
     end_time = time.time()
     elapsed = end_time - start_time
