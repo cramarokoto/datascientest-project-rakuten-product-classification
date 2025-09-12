@@ -69,11 +69,11 @@ def load_preprocessed_text_data():
         FileNotFoundError: If any of the required files are missing.
     """
     print("Loading preprocessed data")
-    X_train_val = joblib.load(os.path.join(DATA_DIR, "./data/preprocessed/X_train_preprocessed.pkl"))
-    X_test = joblib.load(os.path.join(DATA_DIR, "./data/preprocessed/X_test_preprocessed.pkl"))
+    X_train_val = joblib.load(os.path.join(DATA_DIR, "./preprocessed/X_train_preprocessed.pkl"))
+    X_test = joblib.load(os.path.join(DATA_DIR, "./preprocessed/X_test_preprocessed.pkl"))
 
-    y_train_val = joblib.load(os.path.join(DATA_DIR, "./data/preprocessed/y_train_preprocessed.pkl"))
-    y_test = joblib.load(os.path.join(DATA_DIR, "./data/preprocessed/y_test_preprocessed.pkl"))
+    y_train_val = joblib.load(os.path.join(DATA_DIR, "./preprocessed/y_train_preprocessed.pkl"))
+    y_test = joblib.load(os.path.join(DATA_DIR, "./preprocessed/y_test_preprocessed.pkl"))
     return X_train_val, X_test, y_train_val, y_test
 
 
@@ -360,13 +360,13 @@ def export_classification_reports(model_name, y_pred, y_test, best_params, searc
         f.write('Best params : ' + str(best_params) + '\n')
         f.write('Search params : ' + str(search_params) + '\n')
 
-def export_model(model, model_name):
+def export_model(model_name, model):
     """
     Exports the given model to a file using joblib.
 
     Args:
-        model: The trained model object to be saved.
         model_name (str): The name to use for the saved model file.
+        model: The trained model object to be saved.
 
     Returns:
         None
