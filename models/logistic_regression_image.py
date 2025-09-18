@@ -17,11 +17,11 @@ from sklearn.metrics import classification_report, confusion_matrix
 # -----------------------------
 # Load sampled data and split train/test
 # -----------------------------
-def load_sampled_paths_data():
+def load_sampled_paths_data(test_size=0.2, random_state=42):
     print("Loading data (x, y)")
     X, y, _ = load_data()
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
+        X, y, test_size=test_size, random_state=random_state, stratify=y
     )
     X_train_sampled, y_train_sampled = dataset_sampler_under_oversampling(X_train, y_train)
     X_train_sampled = prepare_images_df(X_train_sampled, n_images=None, split="train", random_state=42)
@@ -277,7 +277,6 @@ def process_if_already_done():
 
 
 if __name__ == "__main__":
-    whole_process_and_training()
+    # whole_process_and_training()
     # process_if_already_done()  # Uncomment it's not the first run
-    
-
+    pass
