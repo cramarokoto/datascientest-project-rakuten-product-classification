@@ -1,0 +1,3 @@
+Execution time : Temps total d'exécution : 4676.37 secondes (77.94 minutes)
+Best params : {'C': 100, 'solver': 'saga'}
+Search params : {'solver': ['lbfgs', 'saga'], 'C': [0.01, 0.1, 1, 10, 100]}
