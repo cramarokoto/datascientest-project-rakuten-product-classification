@@ -9,3 +9,4 @@ seaborn==0.13.2
 xgboost==3.0.1
 pyarrow==21.0.0
 ipython==9.5.0
+tensorflow
