@@ -2,6 +2,14 @@ import time
 
 import pandas as pd
 import numpy as np
+
+import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(PROJECT_ROOT)
+
+from scripts.utils import export_classification_reports, export_model, load_preprocessed_text_data
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import classification_report, confusion_matrix
@@ -10,12 +18,9 @@ import joblib
 # -----------------------------
 # Load preprocessed data
 # -----------------------------
-print("Loading preprocessed data")
-X_train = joblib.load("../data/preprocessed/X_train_preprocessed.pkl")
-X_test = joblib.load("../data/preprocessed/X_test_preprocessed.pkl")
-
-y_train = joblib.load("../data/preprocessed/y_train_preprocessed.pkl").values.ravel()
-y_test = joblib.load("../data/preprocessed/y_test_preprocessed.pkl").values.ravel()
+X_train, X_test, y_train, y_test = load_preprocessed_text_data()
+y_train = y_train.values.ravel()
+y_test = y_test.values.ravel()
 
 
 # -----------------------------
@@ -64,23 +69,18 @@ best_estimator.fit(
 
 end_time = time.time()
 elapsed = end_time - start_time
-print(f"Temps total d'exécution : {elapsed:.2f} secondes ({elapsed/60:.2f} minutes)")
-
+elapsed_formatted = f"Temps total d'exécution : {elapsed:.2f} secondes ({elapsed/60:.2f} minutes)"
+print(elapsed_formatted)
 # -----------------------------
 # Evaluate on test set
 # -----------------------------
 print("Evaluating on test set")
 y_pred = best_estimator.predict(X_test)
 
-report = classification_report(y_test, y_pred, output_dict=True)
-print("Classification Report:\n", report)
-print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
 
 # -----------------------------
 # Save the model and classification report
 # -----------------------------
-print("Saving model and classification report")
-joblib.dump(best_estimator, '../models/random_forest_model.pkl')
 
-with open('../models/random_forest_classification_report.txt', 'w') as f:
-    f.write(classification_report(y_test, y_pred))
+export_model('random_forest', best_estimator)
+export_classification_reports('random_forest', y_pred, y_test, best_params, param_list, elapsed_formatted)
