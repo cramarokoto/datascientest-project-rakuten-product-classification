@@ -41,11 +41,11 @@ def train_paths_labels():
     print("Encoded y shapes:", y_train_enc.shape, y_test_enc.shape)
 
     train_paths = train_sampled_df[CURRENT_FORMAT["col_path"]].values
-    train_labels = y_train_enc.values
+    train_labels = y_train_enc
 
     num_classes = len(le.classes_)
 
-    return train_paths, train_labels, test_df, num_classes, y_train_enc, y_test_enc
+    return train_paths, train_labels, test_df, num_classes, y_test_enc
 
 
 # -----------------------------
@@ -113,7 +113,7 @@ def make_test_dataset(test_df, y_test_enc):
 def main_cnn():  # Modify CURRENT_FORMAT or RESIZE_DIM to try other parameters.
     start_time = time.time()
 
-    train_paths, train_labels, test_df, num_classes, y_train_enc, y_test_enc = (
+    train_paths, train_labels, test_df, num_classes, y_test_enc = (
         train_paths_labels()
     )
 
