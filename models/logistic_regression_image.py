@@ -209,8 +209,8 @@ def process_if_already_done():
 
     ipca = joblib.load("./models/ipca_for_image_logreg.pkl")
 
-    X_train_red = full_data["X_train_red"]
-    X_test_red = full_data["X_test_red"]
+    X_train_red = joblib.load('./data/images/X_train_reduced_image_logreg.pkl') # To have locally
+    X_test_red = joblib.load('./data/images/X_test_reduced_image_logreg.pkl') # To have locally
 
     best_model = full_data["model"]
     print("Best model:", best_model)
