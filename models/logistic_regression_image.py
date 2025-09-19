@@ -3,36 +3,15 @@ import joblib
 import numpy as np
 from PIL import Image
 
-from scripts.utils import load_data, dataset_sampler_under_oversampling, prepare_images_df
+from scripts.utils import load_sampled_paths_data, encoding_labels, export_classification_reports, export_model
 
 from sklearn.decomposition import IncrementalPCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV, StratifiedKFold
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+
 from sklearn.metrics import classification_report, confusion_matrix
 
-
-# -----------------------------
-# Load sampled data and split train/test
-# -----------------------------
-def load_sampled_paths_data(test_size=0.2, random_state=42):
-    print("Loading data (x, y)")
-    X, y, _ = load_data()
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_state, stratify=y
-    )
-    X_train_sampled, y_train_sampled = dataset_sampler_under_oversampling(X_train, y_train)
-    X_train_sampled = prepare_images_df(X_train_sampled, n_images=None, split="train", random_state=42)
-
-    X_test = prepare_images_df(X_test, n_images=None, split="train", random_state=42)
-
-    train_sampled_df = X_train_sampled.merge(y_train_sampled, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
-
-    test_df = X_test.merge(y_test, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
-
-    return train_sampled_df, test_df
 
 # -----------------------------
 # Batching images and Reduce dimensionality with Incremental PCA 
@@ -93,23 +72,6 @@ def reduce_dimensionality(ipca, df, batch_size=512):
 
     return X_red
 
-# -----------------------------
-# Encode labels
-# -----------------------------
-def encoding_labels(train_df, test_df):
-    print("Encoding labels")
-    le = LabelEncoder()
-    y_train_enc = le.fit_transform(train_df["prdtypecode"])
-    y_test_enc = le.transform(test_df["prdtypecode"])
-
-    # dictionnaire prdtypecode -> index
-    label_map = {cls: idx for idx, cls in enumerate(le.classes_)}
-    # dictionnaire index -> prdtypecode
-    inverse_map = {v: k for k, v in label_map.items()}
-
-    
-    return y_train_enc, y_test_enc, label_map, inverse_map, le
-
 
 # -----------------------------
 # Grid Search Halving
@@ -162,7 +124,7 @@ def halving_logreg(X_train_red, y_train_enc, random_state=42):
     return search
 
 
-def save_model_and_results(search_model, X_test_red, y_test_enc):
+def save_model_and_results(search_model, X_test_red, y_test_enc, le):
     # Best hyperparameters
     best_params = search_model.best_params_
     print("Best hyperparameters :", best_params)
@@ -173,16 +135,22 @@ def save_model_and_results(search_model, X_test_red, y_test_enc):
     joblib.dump(best_estimator, './models/logistic_regression_image_model.pkl')
 
     print("Evaluating on test set")
-    y_pred = search_model.predict(X_test_red)
+    y_pred_enc = search_model.predict(X_test_red)
 
-    report = classification_report(y_test_enc, y_pred, output_dict=True)
+    y_pred = le.inverse_transform(y_pred_enc)
+    y_test = le.inverse_transform(y_test_enc)
+
+    report = classification_report(y_test, y_pred, output_dict=True)
     print("Classification Report:\n", report)
-    print("Confusion Matrix:\n", confusion_matrix(y_test_enc, y_pred))
-
     with open('./models/logistic_regression_image_report.txt', 'w') as f:
-        f.write(classification_report(y_test_enc, y_pred))
+        f.write(report)
 
-    return report
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    print("Confusion Matrix:\n", conf_matrix)
+    with open('./models/logistic_regression_image_confusion_matrix.txt', 'w') as f:
+        f.write(conf_matrix)
+
+    return report, conf_matrix
     
 # -----------------------------
 # Main & Tests
@@ -192,18 +160,16 @@ def whole_process_and_training():
     print("### Preparing data")
     train_sampled_df, test_df = load_sampled_paths_data()
     y_train_enc, y_test_enc, label_map, inverse_map, le = encoding_labels(train_sampled_df, test_df)
-    joblib.dump(le, './models/labelEncoder_image_logreg.pkl')
     print("Encoded y shapes:", y_train_enc.shape, y_test_enc.shape)
 
     # Fit IncrementalPCA and reduce dimensionality
     print("### Fitting IncrementalPCA and reducing dimensionality")
     
-    # ipca = fit_incremental_pca(train_sampled_df, n_components=256, batch_size=512)
-    # X_train_red = reduce_dimensionality(ipca, train_sampled_df, batch_size=512)
-    # joblib.dump(X_train_red, './data/images/X_train_reduced_image_logreg.pkl')
-    # print("Reduced X train shape:", X_train_red.shape)
+    ipca = fit_incremental_pca(train_sampled_df, n_components=256, batch_size=512)
+    X_train_red = reduce_dimensionality(ipca, train_sampled_df, batch_size=512)
+    joblib.dump(X_train_red, './data/images/X_train_reduced_image_logreg.pkl')
+    print("Reduced X train shape:", X_train_red.shape)
 
-    ipca = joblib.load("./models/ipca_for_image_logreg.pkl")
     X_train_red = joblib.load('./data/images/X_train_reduced_image_logreg.pkl')
     X_test_red = reduce_dimensionality(ipca, test_df, batch_size=512)
     joblib.dump(X_test_red, './data/images/X_test_reduced_image_logreg.pkl')
@@ -216,14 +182,15 @@ def whole_process_and_training():
     # Save model and results
     print("### Saving model and results")
 
-    report = save_model_and_results(search_model, X_test_red, y_test_enc)
+    report, conf_matrix = save_model_and_results(search_model, X_test_red, y_test_enc, le)
 
     # If everything worked, we can save everything in one file
     joblib.dump({
         "label_encoder": le,
         "ipca": ipca,
         "model": search_model.best_estimator_,
-        "report": report, 
+        "report": report,
+        "confustion_matrix": conf_matrix,
         "fit_time": search_model.refit_time_
     }, './models/logistic_regression_image_full_data.pkl')
 
@@ -237,8 +204,10 @@ def process_if_already_done():
     full_data = joblib.load("./models/logistic_regression_image_full_data.pkl")
 
     le = full_data["label_encoder"]
-    y_train_enc = le.trasnform(train_sampled_df["prdtypecode"])
+    y_train_enc = le.transform(train_sampled_df["prdtypecode"])
     y_test_enc = le.transform(test_df["prdtypecode"])
+
+    ipca = joblib.load("./models/ipca_for_image_logreg.pkl")
 
     X_train_red = full_data["X_train_red"]
     X_test_red = full_data["X_test_red"]
@@ -254,14 +223,19 @@ def process_if_already_done():
     
     joblib.dump(best_model, './models/logistic_regression_image_model.pkl')
 
-    y_pred = best_model.predict(X_test_red)
+    y_pred_enc = best_model.predict(X_test_red)
+    y_pred = le.inverse_transform(y_pred_enc)
+    y_test = le.inverse_transform(y_test_enc)
 
-    report = classification_report(y_test_enc, y_pred, output_dict=True)
+    report = classification_report(y_test, y_pred, output_dict=True)
     print("Classification Report:\n", report)
-    with open('./models/logistic_regression_image_report.txt', 'w') as f:
-        f.write(classification_report(y_test_enc, y_pred))
+    with open('./models/logistic_regression_image_classification_report.txt', 'w') as f:
+        f.write(report)
 
-    print("Confusion Matrix:\n", confusion_matrix(y_test_enc, y_pred))
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    print("Confusion Matrix:\n", conf_matrix)
+    with open('./models/logistic_regression_image_confusion_matrix.txt', 'w') as f:
+        f.write(conf_matrix)
 
     ipca = full_data["ipca"]
 
@@ -269,7 +243,8 @@ def process_if_already_done():
         "label_encoder": le,
         "ipca": ipca,
         "model": best_model,
-        "report": report,
+        "classification_report": report,
+        "confusion_matrix": conf_matrix,
         "fit_time": elapsed
     }, './models/logistic_regression_image_full_data.pkl')
 
@@ -277,6 +252,6 @@ def process_if_already_done():
 
 
 if __name__ == "__main__":
-    # whole_process_and_training()
+    # whole_process_and_training() # First run
     # process_if_already_done()  # Uncomment it's not the first run
     pass

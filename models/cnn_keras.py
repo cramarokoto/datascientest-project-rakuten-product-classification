@@ -1,12 +1,15 @@
 import time
 
 import joblib
+import json
 import numpy as np
+import pandas as pd
 import tensorflow as tf
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 from tensorflow.keras import layers, models
+from tensorflow.keras.models import load_model
 
-from models.logistic_regression_image import encoding_labels, load_sampled_paths_data
+from scripts.utils import load_sampled_paths_data, encoding_labels
 
 # -----------------------------
 # Global variables
@@ -43,9 +46,7 @@ def train_paths_labels():
     train_paths = train_sampled_df[CURRENT_FORMAT["col_path"]].values
     train_labels = y_train_enc
 
-    num_classes = len(le.classes_)
-
-    return train_paths, train_labels, test_df, num_classes, y_test_enc
+    return train_paths, train_labels, test_df, y_test_enc, le
 
 
 # -----------------------------
@@ -80,10 +81,13 @@ def easy_cnn(num_classes):
                 input_shape=img_size + (1 if CURRENT_FORMAT["grayscale"] else 3,),
             ),
             layers.MaxPooling2D(2),
+
             layers.Conv2D(64, (3, 3), activation="relu"),
             layers.MaxPooling2D(2),
+
             layers.Conv2D(128, (3, 3), activation="relu"),
             layers.MaxPooling2D(2),
+            
             layers.Flatten(),
             layers.Dense(128, activation="relu"),
             layers.Dropout(0.5),
@@ -98,7 +102,7 @@ def easy_cnn(num_classes):
 # -----------------------------
 def make_test_dataset(test_df, y_test_enc):
     test_paths = test_df[CURRENT_FORMAT["col_path"]].values
-    test_labels = y_test_enc.values
+    test_labels = y_test_enc
 
     test_ds = tf.data.Dataset.from_tensor_slices((test_paths, test_labels))
     test_ds = test_ds.map(process_image, num_parallel_calls=tf.data.AUTOTUNE)
@@ -113,9 +117,12 @@ def make_test_dataset(test_df, y_test_enc):
 def main_cnn():  # Modify CURRENT_FORMAT or RESIZE_DIM to try other parameters.
     start_time = time.time()
 
-    train_paths, train_labels, test_df, num_classes, y_test_enc = (
+    train_paths, train_labels, test_df, y_test_enc, le = (
         train_paths_labels()
     )
+
+    num_classes = len(le.classes_)
+    print("\nle classes encodés:", le.classes_)
 
     dataset = tf.data.Dataset.from_tensor_slices((train_paths, train_labels))
     dataset = dataset.map(process_image, num_parallel_calls=tf.data.AUTOTUNE)
@@ -145,7 +152,7 @@ def main_cnn():  # Modify CURRENT_FORMAT or RESIZE_DIM to try other parameters.
     elapsed = end_time - start_time
     print(f"Total time to train the model: {elapsed:.2f} seconds, or {elapsed/60:.2f} minutes, or {elapsed/3600:.2f} hours")
 
-    model.save("cnn_model.h5")
+    model.save("models/cnn_model.keras")
 
     test_ds = make_test_dataset(test_df, y_test_enc)
 
@@ -153,31 +160,129 @@ def main_cnn():  # Modify CURRENT_FORMAT or RESIZE_DIM to try other parameters.
     loss, acc = model.evaluate(test_ds)
     print(f"✅ Test accuracy: {acc:.4f}, Test loss: {loss:.4f}")
 
-    y_true = []
-    y_pred = []
+    y_true_enc = []
+    y_pred_enc = []
 
     for imgs, labels in test_ds:
         preds = model.predict(imgs)
-        y_true.extend(labels.numpy())
-        y_pred.extend(np.argmax(preds, axis=1))
+        y_true_enc.extend(labels.numpy())
+        y_pred_enc.extend(np.argmax(preds, axis=1))
+    
+    # ----- Debug infos -----
+    y_true_enc = np.array(y_true_enc)
+    y_pred_enc = np.array(y_pred_enc)
 
-    report = classification_report(y_true, y_pred, output_dict=True)
+    print("👉 Nombre d'échantillons test :", len(y_true_enc))
+    print("👉 Labels uniques dans le test set :", np.unique(y_true_enc))
+    print("👉 Labels uniques prédits :", np.unique(y_pred_enc))
+
+    print("\nDistribution des vraies classes (test) :")
+    print(pd.Series(y_true_enc).value_counts().sort_index())
+
+    print("\nDistribution des classes prédites :")
+    print(pd.Series(y_pred_enc).value_counts().sort_index())
+    # ----- ----------- -----
+
+    y_test = le.inverse_transform(y_true_enc)
+    y_pred = le.inverse_transform(y_pred_enc)
+
+    report = classification_report(y_test, y_pred, output_dict=True)
     print("Classification Report:\n", report)
+    with open("./models/cnn_image_classification_report.txt", "w") as f:
+        f.write(report)
 
-    with open("./models/cnn_image_report.txt", "w") as f:
-        f.write(classification_report(y_true, y_pred))
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    print("Confusion Matrix:\n", conf_matrix)
+    with open('./models/cnn_image_confusion_matrix.txt', 'w') as f:
+        f.write(conf_matrix)
 
-        joblib.dump(
-            {
-                "model": model,
-                "report": report,
-                "fit_time": elapsed,
-            },
-            "./models/cnn_image_full_data.pkl",
-        )
+    joblib.dump(
+        {
+            "model": model,
+            "le": le,
+            "classification_report": report,
+            "confusion_matrix": conf_matrix,
+            "fit_time": elapsed,
+        },
+        "./models/cnn_image_full_data.pkl",
+    )
+
+    with open("cnn_image_history.json", "w") as f:
+        json.dump(history.history, f)
 
     print("\nMy job here is done.")
 
 
+def if_model_saved():
+
+    train_paths, train_labels, test_df, y_test_enc, le = (
+        train_paths_labels()
+    )
+
+    model = load_model("models/cnn_model.h5")
+    # model = load_model("models/cnn_model.keras") # Depends on the one saved
+
+    test_ds = make_test_dataset(test_df, y_test_enc)
+
+    # Évaluation
+    loss, acc = model.evaluate(test_ds)
+    print(f"✅ Test accuracy: {acc:.4f}, Test loss: {loss:.4f}")
+
+    y_true_enc = []
+    y_pred_enc = []
+
+    for imgs, labels in test_ds:
+        preds = model.predict(imgs)
+        y_true_enc.extend(labels.numpy())
+        y_pred_enc.extend(np.argmax(preds, axis=1))
+    
+    # ----- Debug infos -----
+    y_true_enc = np.array(y_true_enc)
+    y_pred_enc = np.array(y_pred_enc)
+
+    print("👉 Nombre d'échantillons test :", len(y_true_enc))
+    print("👉 Labels uniques dans le test set :", np.unique(y_true_enc))
+    print("👉 Labels uniques prédits :", np.unique(y_pred_enc))
+
+    print("\nDistribution des vraies classes (test) :")
+    print(pd.Series(y_true_enc).value_counts().sort_index())
+
+    print("\nDistribution des classes prédites :")
+    print(pd.Series(y_pred_enc).value_counts().sort_index())
+    # ----- ----------- -----
+
+    y_test = le.inverse_transform(y_true_enc)
+    y_pred = le.inverse_transform(y_pred_enc)
+
+    report = classification_report(y_test, y_pred, output_dict=True)
+    print("Classification Report:\n", report)
+    with open("./models/cnn_image_classification_report.txt", "w") as f:
+        f.write(report)
+
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    print("Confusion Matrix:\n", conf_matrix)
+    with open('./models/cnn_image_confusion_matrix.txt', 'w') as f:
+        f.write(conf_matrix)
+
+    full_data = joblib.load("./models/cnn_image_full_data.pkl")
+    elapsed = full_data["fit_time"]
+
+    joblib.dump(
+        {
+            "model": model,
+            "le": le,
+            "classification_report": report,
+            "confusion_matrix": conf_matrix,
+            "fit_time": elapsed,
+        },
+        "./models/cnn_image_full_data.pkl",
+    )
+
+    print("\nMy job here is done.")
+
+
+
 if __name__ == "__main__":
-    main_cnn()
+    # main_cnn() # If first time
+    # if_model_saved() # For other check
+    pass

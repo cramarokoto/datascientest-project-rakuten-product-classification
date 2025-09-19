@@ -6,6 +6,9 @@ import joblib
 # Data analysis libraries
 import pandas as pd
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+
 import numpy as np
 
 # IPython Notebook magic
@@ -324,6 +327,45 @@ def dataset_sampler_under_oversampling(X_train, y_train):
     # print(y_train['prdtypecode'].value_counts(normalize=True) * 100)
     return X_train, y_train
 
+# -----------------------------
+# Load sampled data and split train/test
+# -----------------------------
+def load_sampled_paths_data(test_size=0.2, random_state=42):
+    print("Loading data (x, y)")
+    X, y, _ = load_data()
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state, stratify=y
+    )
+    X_train_sampled, y_train_sampled = dataset_sampler_under_oversampling(X_train, y_train)
+    X_train_sampled = prepare_images_df(X_train_sampled, n_images=None, split="train", random_state=random_state)
+
+    X_test = prepare_images_df(X_test, n_images=None, split="train", random_state=random_state)
+
+    train_sampled_df = X_train_sampled.merge(y_train_sampled, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
+
+    test_df = X_test.merge(y_test, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
+
+    return train_sampled_df, test_df
+
+
+# -----------------------------
+# Encode labels
+# -----------------------------
+def encoding_labels(train_df, test_df):
+    print("Encoding labels")
+    le = LabelEncoder()
+    y_train_enc = le.fit_transform(train_df["prdtypecode"])
+    y_test_enc = le.transform(test_df["prdtypecode"])
+
+    # dictionnaire prdtypecode -> index
+    label_map = {cls: idx for idx, cls in enumerate(le.classes_)}
+    # dictionnaire index -> prdtypecode
+    inverse_map = {v: k for k, v in label_map.items()}
+
+    
+    return y_train_enc, y_test_enc, label_map, inverse_map, le
+
+
 #####################################
 ############# EXPORTS ###############
 #####################################
@@ -359,6 +401,7 @@ def export_classification_reports(model_name, y_pred, y_test, best_params, searc
         f.write('Execution time : ' + str(elapsed_formatted) + '\n')
         f.write('Best params : ' + str(best_params) + '\n')
         f.write('Search params : ' + str(search_params) + '\n')
+
 
 def export_model(model_name, model):
     """
