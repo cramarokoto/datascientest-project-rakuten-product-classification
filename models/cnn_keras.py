@@ -187,12 +187,12 @@ def main_cnn():  # Modify CURRENT_FORMAT or RESIZE_DIM to try other parameters.
     y_pred = le.inverse_transform(y_pred_enc)
 
     report = classification_report(y_test, y_pred, output_dict=True)
-    print("Classification Report:\n", str(report))
+    print("Classification Report:\n", classification_report(y_test, y_pred))
     with open("./models/cnn_image_classification_report.txt", "w") as f:
-        f.write(str(report))
+        f.write(classification_report(y_test, y_pred))
 
     conf_matrix = confusion_matrix(y_test, y_pred)
-    print("Confusion Matrix:\n", str(conf_matrix))
+    print("Confusion Matrix:\n", conf_matrix)
     with open('./models/cnn_image_confusion_matrix.txt', 'w') as f:
         f.write(str(conf_matrix))
 
