@@ -187,14 +187,14 @@ def main_cnn():  # Modify CURRENT_FORMAT or RESIZE_DIM to try other parameters.
     y_pred = le.inverse_transform(y_pred_enc)
 
     report = classification_report(y_test, y_pred, output_dict=True)
-    print("Classification Report:\n", report)
+    print("Classification Report:\n", str(report))
     with open("./models/cnn_image_classification_report.txt", "w") as f:
-        f.write(report)
+        f.write(str(report))
 
     conf_matrix = confusion_matrix(y_test, y_pred)
-    print("Confusion Matrix:\n", conf_matrix)
+    print("Confusion Matrix:\n", str(conf_matrix))
     with open('./models/cnn_image_confusion_matrix.txt', 'w') as f:
-        f.write(conf_matrix)
+        f.write(str(conf_matrix))
 
     joblib.dump(
         {
@@ -219,8 +219,8 @@ def if_model_saved():
         train_paths_labels()
     )
 
-    model = load_model("models/cnn_model.h5")
-    # model = load_model("models/cnn_model.keras") # Depends on the one saved
+    model = load_model("models/cnn_model.keras")
+    # model = load_model("models/cnn_model.h5") # Depends on the one saved
 
     test_ds = make_test_dataset(test_df, y_test_enc)
 
@@ -255,14 +255,14 @@ def if_model_saved():
     y_pred = le.inverse_transform(y_pred_enc)
 
     report = classification_report(y_test, y_pred, output_dict=True)
-    print("Classification Report:\n", report)
+    print("Classification Report:\n", classification_report(y_test, y_pred))
     with open("./models/cnn_image_classification_report.txt", "w") as f:
-        f.write(report)
+        f.write(classification_report(y_test, y_pred))
 
     conf_matrix = confusion_matrix(y_test, y_pred)
     print("Confusion Matrix:\n", conf_matrix)
     with open('./models/cnn_image_confusion_matrix.txt', 'w') as f:
-        f.write(conf_matrix)
+        f.write(str(conf_matrix))
 
     full_data = joblib.load("./models/cnn_image_full_data.pkl")
     elapsed = full_data["fit_time"]

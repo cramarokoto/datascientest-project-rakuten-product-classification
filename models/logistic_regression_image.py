@@ -226,16 +226,16 @@ def process_if_already_done():
     y_pred_enc = best_model.predict(X_test_red)
     y_pred = le.inverse_transform(y_pred_enc)
     y_test = le.inverse_transform(y_test_enc)
-
+    
     report = classification_report(y_test, y_pred, output_dict=True)
-    print("Classification Report:\n", report)
-    with open('./models/logistic_regression_image_classification_report.txt', 'w') as f:
-        f.write(report)
+    print("Classification Report:\n", classification_report(y_test, y_pred))
+    with open("./models/cnn_image_classification_report.txt", "w") as f:
+        f.write(classification_report(y_test, y_pred))
 
     conf_matrix = confusion_matrix(y_test, y_pred)
     print("Confusion Matrix:\n", conf_matrix)
-    with open('./models/logistic_regression_image_confusion_matrix.txt', 'w') as f:
-        f.write(conf_matrix)
+    with open('./models/cnn_image_confusion_matrix.txt', 'w') as f:
+        f.write(str(conf_matrix))
 
     ipca = full_data["ipca"]
 
