@@ -1,3 +1,3 @@
-Execution time : Temps total d'exécution : 10703.95 secondes (178.40 minutes)
+Execution time : Temps total d'exécution : 3115.83 secondes (51.93 minutes)
 Best params : None
 Search params : None

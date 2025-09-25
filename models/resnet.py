@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from scripts.utils import image_path, load_data, export_classification_reports, export_model
+from scripts.utils import image_path, load_data, export_classification_reports
 
 import torch
 import torch.nn as nn
@@ -114,13 +114,19 @@ def main():
     # -----------------------------
     # 6️⃣ Define ResNet model
     # -----------------------------
-    print("Loading pretrained ResNet18")
+    print("Loading pretrained ResNet18 for fine tuning")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = models.resnet18(weights=ResNet18_Weights.DEFAULT)
-    for param in model.parameters():
-        param.requires_grad = False  # freeze backbone
+    # Freeze all layers except the last convolutional block (layer4)
+    for name, param in model.named_parameters():
+        param.requires_grad = name.startswith("layer4")
+    
+    # Replace the final fully connected layer and explicitly unfreeze it
     model.fc = nn.Linear(model.fc.in_features, len(le.classes_))
+    for param in model.fc.parameters():
+        param.requires_grad = True
+
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()
@@ -129,10 +135,10 @@ def main():
     # -----------------------------
     # 7️⃣ Training loop
     # -----------------------------
-    EPOCHS = 5
+    EPOCHS = 7
     print("Starting training")
     start_time = time.time()
-    early_stopper = EarlyStopper(patience=2, min_delta=0.001)
+    early_stopper = EarlyStopper(patience=2, min_delta=0.01)
 
     for epoch in range(EPOCHS):
         model.train()
@@ -202,7 +208,10 @@ def main():
     # -----------------------------
     y_pred = le.inverse_transform(y_pred_enc)
 
-    export_model('resnet', model)
+    # Save with PyTorch (not joblib)
+    print("Saving model using torch.save")
+    torch.save(model.state_dict(), 'models/resnet_model.pth')
+
     export_classification_reports('resnet', y_pred, y_test, None, None, elapsed_formatted)
 
 if __name__ == "__main__":
