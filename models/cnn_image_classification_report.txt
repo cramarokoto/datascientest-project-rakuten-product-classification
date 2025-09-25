@@ -1,1 +1,33 @@
-{'10': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 623.0}, '40': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 502.0}, '50': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 336.0}, '60': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 166.0}, '1140': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 534.0}, '1160': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 791.0}, '1180': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 153.0}, '1280': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 974.0}, '1281': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 414.0}, '1300': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 1009.0}, '1301': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 161.0}, '1302': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 498.0}, '1320': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 648.0}, '1560': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 1015.0}, '1920': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 861.0}, '1940': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 161.0}, '2060': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 999.0}, '2220': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 165.0}, '2280': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 952.0}, '2403': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 955.0}, '2462': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 284.0}, '2522': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 998.0}, '2582': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 518.0}, '2583': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 2042.0}, '2585': {'precision': 0.029380593499764483, 'recall': 1.0, 'f1-score': 0.057084024480924325, 'support': 499.0}, '2705': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 552.0}, '2905': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 174.0}, 'accuracy': 0.029380593499764483, 'macro avg': {'precision': 0.0010881701296209067, 'recall': 0.037037037037037035, 'f1-score': 0.002114223128923123, 'support': 16984.0}, 'weighted avg': {'precision': 0.000863219274398403, 'recall': 0.029380593499764483, 'f1-score': 0.001677162518604642, 'support': 16984.0}}
+              precision    recall  f1-score   support
+
+          10       0.00      0.00      0.00       623
+          40       0.00      0.00      0.00       502
+          50       0.00      0.00      0.00       336
+          60       0.00      0.00      0.00       166
+        1140       0.00      0.00      0.00       534
+        1160       0.00      0.00      0.00       791
+        1180       0.00      0.00      0.00       153
+        1280       0.00      0.00      0.00       974
+        1281       0.00      0.00      0.00       414
+        1300       0.00      0.00      0.00      1009
+        1301       0.00      0.00      0.00       161
+        1302       0.00      0.00      0.00       498
+        1320       0.00      0.00      0.00       648
+        1560       0.00      0.00      0.00      1015
+        1920       0.00      0.00      0.00       861
+        1940       0.00      0.00      0.00       161
+        2060       0.00      0.00      0.00       999
+        2220       0.00      0.00      0.00       165
+        2280       0.00      0.00      0.00       952
+        2403       0.00      0.00      0.00       955
+        2462       0.00      0.00      0.00       284
+        2522       0.00      0.00      0.00       998
+        2582       0.00      0.00      0.00       518
+        2583       0.00      0.00      0.00      2042
+        2585       0.03      1.00      0.06       499
+        2705       0.00      0.00      0.00       552
+        2905       0.00      0.00      0.00       174
+
+    accuracy                           0.03     16984
+   macro avg       0.00      0.04      0.00     16984
+weighted avg       0.00      0.03      0.00     16984
