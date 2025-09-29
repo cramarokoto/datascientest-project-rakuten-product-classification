@@ -4,7 +4,16 @@ import streamlit as st
 
 import config
 
-from tabs import intro, second_tab, third_tab
+from tabs import (
+    intro,
+    equipe,
+    exploration_donnees,
+    preproc_textuel,
+    preproc_images,
+    modelisation,
+    interpretabilite,
+    conclusion,
+)
 
 
 st.set_page_config(
@@ -24,17 +33,22 @@ st.markdown(f"<style>{style}</style>", unsafe_allow_html=True)
 TABS = OrderedDict(
     [
         (intro.sidebar_name, intro),
-        (second_tab.sidebar_name, second_tab),
-        (third_tab.sidebar_name, third_tab),
+        (equipe.sidebar_name, equipe),
+        (exploration_donnees.sidebar_name, exploration_donnees),
+        (preproc_textuel.sidebar_name, preproc_textuel),
+        (preproc_images.sidebar_name, preproc_images),
+        (modelisation.sidebar_name, modelisation),
+        (interpretabilite.sidebar_name, interpretabilite),
+        (conclusion.sidebar_name, conclusion),
     ]
 )
 
 
 def run():
-    st.sidebar.image(
-        "https://dst-studio-template.s3.eu-west-3.amazonaws.com/logo-datascientest.png",
-        width=200,
-    )
+    # st.sidebar.image(
+    #     "https://dst-studio-template.s3.eu-west-3.amazonaws.com/logo-datascientest.png",
+    #     width=200,
+    # )
     tab_name = st.sidebar.radio("", list(TABS.keys()), 0)
     st.sidebar.markdown("---")
     st.sidebar.markdown(f"## {config.PROMOTION}")

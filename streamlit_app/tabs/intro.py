@@ -1,31 +1,34 @@
 import streamlit as st
 
 
-title = "My Awesome DataScientest project."
+title = "Introduction"
 sidebar_name = "Introduction"
 
 
 def run():
 
-    # TODO: choose between one of these GIFs
-    # st.image("https://dst-studio-template.s3.eu-west-3.amazonaws.com/1.gif")
-    st.image("https://dst-studio-template.s3.eu-west-3.amazonaws.com/2.gif")
-    # st.image("https://dst-studio-template.s3.eu-west-3.amazonaws.com/3.gif")
+    st.image("assets/shopping.svg")
 
     st.title(title)
 
     st.markdown("---")
 
-    st.markdown(
-        """
-        Here is a bootsrap template for your DataScientest project, built with [Streamlit](https://streamlit.io).
+    st.header("Présentation du projet")
+    st.write("""
+    Ce projet propose une application de classification automatique des produits du catalogue Rakuten France, 
+    utilisant à la fois les données textuelles (titre et description) et les images fournies pour chaque article.
+    """)
 
-        You can browse streamlit documentation and demos to get some inspiration:
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into streamlit [documentation](https://docs.streamlit.io)
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset] (https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset]
-          (https://github.com/streamlit/demo-uber-nyc-pickups)
-        """
-    )
+    st.header("Objectif")
+    st.write("""
+    L’enjeu est de prédire le type de chaque produit parmi de nombreuses catégories, 
+    en relevant des défis tels que la diversité, le bruit des données réelles de e-commerce, 
+    et la forte déséquilibre des classes. La solution s’appuie sur des modèles de deep learning 
+    pour exploiter l’ensemble des données disponibles et optimiser l’organisation du catalogue.
+    """)
+
+    st.header("En savoir plus")
+    st.markdown("""
+    Pour consulter le détail du challenge et du jeu de données :  
+    [Rakuten France Multimodal Product Data Classification — ENS Challenge](https://challengedata.ens.fr/challenges/35)
+    """)
