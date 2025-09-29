@@ -28,7 +28,11 @@ def run():
     """)
 
     st.header("En savoir plus")
-    st.markdown("""
-    Pour consulter le détail du challenge et du jeu de données :  
-    [Rakuten France Multimodal Product Data Classification — ENS Challenge](https://challengedata.ens.fr/challenges/35)
-    """)
+    cols = st.columns([1, 3])
+    with cols[0]:
+        st.image("assets/RIT_logo_big.jpg")
+    with cols[1]:
+        st.markdown("""
+        Pour consulter le détail du challenge et du jeu de données :  
+        [Rakuten France Multimodal Product Data Classification — ENS Challenge](https://challengedata.ens.fr/challenges/35)
+        """)
