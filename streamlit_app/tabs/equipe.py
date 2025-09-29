@@ -11,6 +11,6 @@ def run():
 
     st.title(title)
     st.markdown("---")
-    st.subheader("Membres de l'équipe")
+    st.markdown(f"## {config.PROMOTION}")
     for member in config.TEAM_MEMBERS:
         st.markdown(member.sidebar_markdown(), unsafe_allow_html=True)

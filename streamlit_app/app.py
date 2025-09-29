@@ -49,11 +49,12 @@ def run():
     #     "https://dst-studio-template.s3.eu-west-3.amazonaws.com/logo-datascientest.png",
     #     width=200,
     # )
-    tab_name = st.sidebar.radio("", list(TABS.keys()), 0)
-    st.sidebar.markdown("---")
-    st.sidebar.markdown(f"## {config.PROMOTION}")
+    st.sidebar.markdown("## Classification Multimodale des Produits - Rakuten France")
 
-    st.sidebar.markdown("### Team members:")
+    tab_name = st.sidebar.radio("", list(TABS.keys()), 0)
+    # st.sidebar.markdown("---")
+    # st.sidebar.markdown(f"## {config.PROMOTION}")
+    st.sidebar.markdown("## Auteurs")
     for member in config.TEAM_MEMBERS:
         st.sidebar.markdown(member.sidebar_markdown(), unsafe_allow_html=True)
 

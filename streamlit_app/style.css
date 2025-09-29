@@ -192,4 +192,9 @@ a:visited {
 /* Safe padding for toolbar/header overlap */
 .stMain {
   padding-top: 56px;
+  padding-bottom: 56px;
+}
+
+hr {
+  width: 100%;
 }
