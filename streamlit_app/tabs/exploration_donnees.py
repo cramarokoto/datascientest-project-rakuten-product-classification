@@ -23,7 +23,7 @@ def run():
     st.image("assets/statistics.svg")
     st.title(title)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["Description globale", "Visualisation des données textuelles", "Visualisation des données graphiques", "Échantillon"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Description", "Visualisation des données textuelles", "Visualisation des données graphiques", "Méthodologie", "Échantillon"])
 
     with tab1:
         st.markdown("""
@@ -276,6 +276,47 @@ def run():
             """
         )
     with tab4:
+        st.markdown("#### Stratégie MLFlow proposée")
+
+        st.markdown("##### Préparation des données")
+        st.markdown("""
+        - Diviser **X_train** et **y_train** en ensembles d'entraînement et de test avec la même répartition.  
+        - Décider si les descriptions nulles doivent être remplacées par des descriptions générées (ex. à partir de la désignation ou de mots-clés).
+        """)
+
+        st.markdown("##### Modélisation texte")
+        st.markdown("""
+        - Construire un modèle de classification des produits basé sur le texte.  
+        - Intégrer des traitements NLP sur la désignation et la description.
+        """)
+
+        st.markdown("##### Modélisation images")
+        st.markdown("""
+        - Appliquer des techniques de Computer Vision pour harmoniser le dataset d'images.  
+        - Transformer les images en vecteurs de pixels associés aux produits.  
+        - Construire un modèle de classification des produits à partir des images.
+        """)
+
+        st.markdown("##### Évaluation et amélioration")
+        st.markdown("""
+        - Évaluer les performances des modèles texte et image.  
+        - Ajuster et optimiser ces modèles pour améliorer les performances.
+        """)
+
+        st.markdown("##### Fusion des modèles")
+        st.markdown("""
+        - Définir des pondérations pour les modèles en fonction de leurs performances respectives.  
+        - Créer une fonction pour calculer une moyenne pondérée des probabilités des classes (comme en Bagging).  
+        - Évaluer la classification finale basée sur cette moyenne pondérée pendant la phase de test.  
+        - Optimiser les pondérations pour améliorer les résultats.
+        """)
+
+        st.markdown("##### Conclusion")
+        st.markdown("""
+        - Comparer les performances du modèle combiné avec celles des meilleurs modèles individuels.  
+        - Conclure sur la solution la plus efficace entre modèle seul et combinaison.
+        """)
+    with tab5:
         st.write("Voici un échantillon de données pour chaque catégorie de produit : nous affichons la catégorie, la designation, la description et l'image.")
 
         X_train, y_train = load_data()
