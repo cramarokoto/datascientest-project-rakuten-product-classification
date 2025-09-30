@@ -10,10 +10,14 @@ def run():
 
     st.title(title)
     
-    tab1, tab2 = st.tabs(["Fine tuned Resnet", "Logistic Regression"])
+    tab1, tab2 = st.tabs(["Modèles de classification des textes", "Modèles de classification des images"])
 
     with tab1:
-        st.markdown("#### Fine tuned Resnet")
+        st.markdown("#### Logistic Regression")
+        st.markdown("#### Random Forest")
+        st.markdown("#### XGBoost")
+    with tab2:
+        st.markdown("#### Grad cam du fine tuned Resnet")
         st.markdown(
             """
             Afin de vérifier la capacité du modèle à classifier les images en utilisant des données utiles, nous étudions l'interprétabilité du modèle via un grad cam.
@@ -52,5 +56,4 @@ def run():
         st.image("assets/grad_cam/gc26.png")
         st.image("assets/grad_cam/gc27.png")
 
-    with tab2:
-        st.markdown("#### Logistic Regression")
+
