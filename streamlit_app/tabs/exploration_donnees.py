@@ -199,12 +199,18 @@ def run():
             st.image("assets/wordclouds/wc8.png")
         st.markdown(
             """
-            Les 4 (premiers) worclouds des catégories de produits avec le plus de descriptions et les 4 (derniers) wordclouds de celles avec le moins de descriptions mettent clairement en avant certains termes plus que d'autres.
+            Les 4 (premiers) wordclouds des catégories de produits avec le plus de descriptions et les 4 (derniers) wordclouds de celles avec le moins de descriptions mettent clairement en avant certains termes plus que d'autres.
 
             Cela nous permet d'identifier la catégorie de produit d'une manière sémantique à la lecture des termes mis en exergue.
             """
         )
     with tab3:
+        st.markdown(
+            """
+            Pour faciliter les traitements, nous avons utilisé un échantillon de 1000 images train en le considérant comme représentatif de l'ensemble des images pour l'exploration.
+            Cette hypothèse ne sera pas contredite par la suite du projet.
+            """
+        )
         st.markdown("##### Format")
         st.image("assets/images_format.png")
         st.markdown(
@@ -233,7 +239,7 @@ def run():
             """
             52,5% des images n’ont aucune dimension égale à 500, ce qui signifie qu’elles n’occupent pas tout l’espace disponible. Cette hétérogénéité réduit l’efficacité de la zone utile pour l’apprentissage automatique, car la quantité d’information varie fortement selon les images. Pour harmoniser les données, on pourrait appliquer des techniques de Computer Vision, comme l’agrandissement par masques ou filtres jusqu’aux bords. Ainsi, un modèle s’entraînerait sur des images plus cohérentes, évitant de comparer des données pleines d’informations à d’autres majoritairement vides (pixels blancs).
 
-            La visualisation de tous les formats de Content box serait trop dispersée, mais un heatmap de luminance permettrait d’analyser la répartition des pixels et donc les dimensions des images. Une autre piste d’étude intéressante concerne le rapport longueur/largeur, qui renseignerait sur la forme générale des images.
+            La visualisation de tous les formats de Content box serait trop dispersée, mais une heatmap de luminance permettrait d’analyser la répartition des pixels et donc les dimensions des images. Une autre piste d’étude intéressante concerne le rapport longueur/largeur, qui renseignerait sur la forme générale des images.
             """
         )
         st.markdown("##### Luminance")
