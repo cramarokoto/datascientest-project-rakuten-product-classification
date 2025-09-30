@@ -23,8 +23,7 @@ def run():
     st.write("""
     L'enjeu est de prédire le type de chaque produit parmi de nombreuses catégories, 
     en relevant des défis tels que la diversité, le bruit des données réelles de e-commerce, 
-    et la forte déséquilibre des classes. La solution s'appuie sur des modèles de deep learning 
-    pour exploiter l'ensemble des données disponibles et optimiser l'organisation du catalogue.
+    et le fort déséquilibre des classes. Nous avons expérimenté différentes approches de machine learning pour résoudre ce problème en exploitant l'ensemble des données disponibles.
     """)
 
     st.header("En savoir plus")
