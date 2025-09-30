@@ -13,9 +13,15 @@ def run():
     tab1, tab2 = st.tabs(["Modèles de classification des textes", "Modèles de classification des images"])
 
     with tab1:
-        st.markdown("#### Logistic Regression")
-        st.markdown("#### Random Forest")
-        st.markdown("#### XGBoost")
+        st.markdown("#### Préprocessing avec SVD")
+        st.markdown("##### Logistic Regression")
+        st.markdown("##### Random Forest")
+        st.markdown("##### XGBoost")
+
+        st.markdown("#### Préprocessing avec SVD")
+        st.markdown("##### Logistic Regression")
+        st.markdown("##### Random Forest")
+        st.markdown("##### XGBoost")
     with tab2:
         st.markdown("#### Grad cam du fine tuned Resnet")
         st.markdown(
