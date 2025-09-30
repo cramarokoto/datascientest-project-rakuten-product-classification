@@ -18,7 +18,7 @@ def run():
         st.markdown("##### Random Forest")
         st.markdown("##### XGBoost")
 
-        st.markdown("#### Préprocessing avec SVD")
+        st.markdown("#### Préprocessing sans SVD")
         st.markdown("##### Logistic Regression")
         st.markdown("##### Random Forest")
         st.markdown("##### XGBoost")
