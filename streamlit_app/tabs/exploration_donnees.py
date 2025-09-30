@@ -188,15 +188,15 @@ def run():
         )
         cols = st.columns(2)
         with cols[0]:
-            st.image("assets/wc1.png")
-            st.image("assets/wc3.png")
-            st.image("assets/wc5.png")
-            st.image("assets/wc7.png")
+            st.image("assets/wordclouds/wc1.png")
+            st.image("assets/wordclouds/wc3.png")
+            st.image("assets/wordclouds/wc5.png")
+            st.image("assets/wordclouds/wc7.png")
         with cols[1]:
-            st.image("assets/wc2.png")
-            st.image("assets/wc4.png")
-            st.image("assets/wc6.png")
-            st.image("assets/wc8.png")
+            st.image("assets/wordclouds/wc2.png")
+            st.image("assets/wordclouds/wc4.png")
+            st.image("assets/wordclouds/wc6.png")
+            st.image("assets/wordclouds/wc8.png")
         st.markdown(
             """
             Les 4 (premiers) worclouds des catégories de produits avec le plus de descriptions et les 4 (derniers) wordclouds de celles avec le moins de descriptions mettent clairement en avant certains termes plus que d'autres.
