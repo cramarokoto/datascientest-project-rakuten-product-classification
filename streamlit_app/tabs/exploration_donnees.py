@@ -1,8 +1,18 @@
 import streamlit as st
+import pandas as pd
 from PIL import Image, ImageOps
 
 title = "Exploration des données"
 sidebar_name = "Exploration des données"
+
+@st.cache_data
+def load_data():
+    """
+    Load the selected data from the csv files
+    """
+    X_train = pd.read_csv("data/selected_X_train.csv")
+    y_train = pd.read_csv("data/selected_y_train.csv")
+    return X_train, y_train
 
 def show_image_with_gray_border(path, caption=None):
     image = Image.open(path)
@@ -266,5 +276,25 @@ def run():
             """
         )
     with tab4:
-        st.markdown("##### Affichage d'un échantillon")
-        st.write("Voici un échantillon d'images et de données textuelles pour chaque catégorie de produit")
+        st.write("Voici un échantillon de données pour chaque catégorie de produit : nous affichons la catégorie, la designation, la description et l'image.")
+
+        X_train, y_train = load_data()
+        for index, row in X_train.iterrows():
+            st.markdown("---")
+            cols = st.columns(2)
+            with cols[0]:
+                st.image(f"data/images/image_{row['imageid']}_product_{row['productid']}.jpg")
+            with cols[1]:
+                st.markdown(
+                    f"""
+                    **Catégorie de produit :** {y_train.loc[index, 'prdtypecode_label']}
+
+                    **Product ID :** {row['productid']}
+
+                    **Designation :** {row['designation']}
+
+                    **Description :**
+                    """,
+                )
+                st.html(row['description'])
+                
