@@ -137,6 +137,26 @@ def run():
         st.markdown("#### Régression logistique")
         st.markdown(
             """
+            ##### Méthodologie
+            Nous avons exploré les hyperparamètres suivants :
+            - D’une part:
+                - C : [0.1, 1, 10]
+                - solver : “lbfgs”
+                - penalty : “l2”
+            - D’autre part:
+                - C : [0.1, 1, 10]
+                - solver : “saga”
+                - penalty : [“l1”, “elasticnet”]
+                - l1_ratio : 0.5
+
+            **Temps d’exécution** : A COMPLETER
+
+            **Rapport de classification** : A COMPLETER
+            """
+        )
+        st.markdown("**Matrice de confusion A COMPLETER**")
+        st.markdown(
+            """
             La régression logistique n'est pas assez performante pour la classification des images. Nous décidons donc d'entraîner un modèle CNN personnalisé au vu du nombre de données disponibles raisonnable.
             """
         )
@@ -170,7 +190,6 @@ def run():
 
             """
         )
-
         st.markdown("**Matrice de confusion**")
         st.image("assets/heatmaps/cnn_image_confusion_matrix.png")
         st.markdown(
