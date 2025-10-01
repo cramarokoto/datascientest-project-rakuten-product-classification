@@ -14,9 +14,37 @@ def run():
 
     with tab1:
         st.markdown("#### Préprocessing avec SVD")
+        st.markdown(
+           """
+            Afin de mieux comprendre les prédictions effectuées par les modèles et d’obtenir une vision plus précise de l’importance des variables, nous avons appliqué SHapley Additive exPlanations (SHAP) sur trois modèles utilisés pour la classification de textes.
+            
+            Pour les modèles entrainés sur toutes les données d’entrainement, nous avons rencontré une difficulté : le prétraitement des données avec SVD a conduit à une perte d’information sur la vectorisation TF-IDF, et donc sur l’interprétation de l’importance des mots utilisés dans la classification des articles.
+
+           """ 
+        )
         st.markdown("##### Logistic Regression")
+        st.markdown(
+            """
+            Summary plot - classe avec le score F1 le plus élevé (2905 - jeux en téléchargement):
+            """
+        )
+        st.image("assets\shap\svd\lr_sum_plot.png")
+
         st.markdown("##### Random Forest")
+        st.markdown(
+            """
+            Summary plot - classe avec le score F1 le plus élevé (2905 - jeux en téléchargement):
+            """
+        )
+        st.image("assets/shap/svd/rfc_sum_plot.png")
+
         st.markdown("##### XGBoost")
+        st.markdown(
+            """
+            Summary plot - classe avec le score F1 le plus élevé (2905 - jeux en téléchargement):
+            """
+        )
+        st.image("assets/shap/svd/xgb_sum_plot.png")
 
         st.markdown("#### Préprocessing sans SVD")
         st.markdown("##### Logistic Regression")
