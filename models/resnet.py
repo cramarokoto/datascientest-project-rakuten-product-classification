@@ -94,7 +94,7 @@ def main():
     label_map = {cls: idx for idx, cls in enumerate(le.classes_)}
 
     # -----------------------------
-    # 5️⃣ Transforms & DataLoaders
+    # 4️⃣ Transforms & DataLoaders
     # -----------------------------
     transformations = transforms.Compose([
         transforms.Resize((224,224)), # Size expected by the model
@@ -112,7 +112,7 @@ def main():
     test_loader  = DataLoader(test_dataset,  batch_size=64, shuffle=False, num_workers=4, pin_memory=True)
 
     # -----------------------------
-    # 6️⃣ Define ResNet model
+    # 5️⃣ Define ResNet model
     # -----------------------------
     print("Loading pretrained ResNet18 for fine tuning")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -133,7 +133,7 @@ def main():
     optimizer = optim.Adam(model.fc.parameters(), lr=1e-3)
 
     # -----------------------------
-    # 7️⃣ Training loop
+    # 6️⃣ Training loop
     # -----------------------------
     EPOCHS = 7
     print("Starting training")
@@ -190,7 +190,7 @@ def main():
     print(elapsed_formatted)
 
     # -----------------------------
-    # 8️⃣ Evaluate on test set
+    # 7️⃣ Evaluate on test set
     # -----------------------------
     print("Evaluating on test set")
     model.eval()
@@ -204,7 +204,7 @@ def main():
             y_test_enc.extend(labels.cpu().numpy())
 
     # -----------------------------
-    # 9️⃣ Save model and report
+    # 8️⃣ Save model and report
     # -----------------------------
     y_pred = le.inverse_transform(y_pred_enc)
 
