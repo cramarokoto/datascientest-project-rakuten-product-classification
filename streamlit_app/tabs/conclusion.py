@@ -10,4 +10,20 @@ def run():
 
     st.title(title)
     st.markdown("---")
-    st.write("Résumez ici vos résultats, limites et pistes de travail.")
+    st.markdown(
+        """
+        #### Résultats
+        - Classement optimal avec **textes** (XGBoost) grâce aux désignations riches.
+        - **Images seules** (ResNet) insuffisantes → similarité visuelle + manque de détails.
+
+        #### Limites techniques
+        - Ressources limitées (RAM/GPU) → temps d’entraînement longs.
+        - Tests et exploration d’hyperparamètres restreints → compromis performance/faisabilité.
+
+        #### Perspectives
+        - **Modèle multimodal end-to-end** (texte + image, type Transformers) :
+            - Croisement des signaux visuels et sémantiques
+            - Robustesse face aux données manquantes ou bruitées
+            - Meilleure gestion des catégories ambiguës et nouveaux produits
+        """
+    )
