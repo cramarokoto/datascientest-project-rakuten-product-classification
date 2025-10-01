@@ -15,7 +15,10 @@ TEAM_MEMBERS = [
         linkedin_url="https://www.linkedin.com/in/ecramarokoto/",
         github_url="https://github.com/cramarokoto",
     ),
-    Member("Cansu YILDIRIM-BALATAN"),
+    Member(
+        name = "Cansu YILDIRIM-BALATAN",
+        linkedin_url = "https://www.linkedin.com/in/cansu-balatan"
+    ),
     Member(
         name="Maël ZAMORA",
         linkedin_url="https://www.linkedin.com/in/mael-zamora/"
