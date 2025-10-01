@@ -28,7 +28,7 @@ def run():
             Summary plot - classe avec le score F1 le plus élevé (2905 - jeux en téléchargement):
             """
         )
-        st.image("assets\shap\svd\lr_sum_plot.png")
+        st.image("assets/shap/svd/lr_sum_plot.png")
 
         st.markdown("##### Random Forest")
         st.markdown(
