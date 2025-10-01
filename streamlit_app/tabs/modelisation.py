@@ -129,5 +129,105 @@ def run():
         st.markdown("**Confusion Matrix**")
         st.image("assets/heatmaps/xgboost_confusion_matrix.png")
     with tab2:
-        st.markdown("#### Custom CNN")
-        st.markdown("#### Fine tuned Resnet")
+        st.markdown(
+            """
+            Pour la classification des images, nous avons testé trois modèles en partant du plus naïf au plus complexe : une régression logistique, un modèle CNN personnalisé et un modèle Fine tuned Resnet.
+            """
+        )
+        st.markdown("#### Régression logistique")
+        st.markdown(
+            """
+            La régression logistique n'est pas assez performante pour la classification des images. Nous décidons donc d'entraîner un modèle CNN personnalisé au vu du nombre de données disponibles raisonnable.
+            """
+        )
+        st.markdown("#### CNN Keras")
+        st.markdown(
+            """
+            ##### Méthodologie  
+            - Prétraitement : resize (224×224), normalisation, encodage labels  
+            - Split : 80% train / 20% val, test séparé  
+            - Dataset : `tf.data` (batch 32, prefetch, AUTOTUNE)  
+
+            ##### Architecture  
+            | Layer | Détails |
+            |-------|---------|
+            | Conv2D (32, 3×3, ReLU) + MaxPool(2) | Extraction bas-niveau |
+            | Conv2D (64, 3×3, ReLU) + MaxPool(2) | Features intermédiaires |
+            | Conv2D (128, 3×3, ReLU) + MaxPool(2) | Features complexes |
+            | Flatten | - |
+            | Dense (128, ReLU) | Fully connected |
+            | Dropout (0.5) | Régularisation |
+            | Dense (num_classes, Softmax) | Classification finale |
+
+            ##### Entraînement  
+            | Paramètre | Valeur |
+            |-----------|--------|
+            | Optimiseur | Adam |
+            | Loss | SparseCategoricalCrossentropy |
+            | Batch size | 32 |
+            | Epochs | 10 |
+            | Validation split | 20% |
+
+            """
+        )
+
+        st.markdown("**Matrice de confusion**")
+        st.image("assets/heatmaps/cnn_image_confusion_matrix.png")
+        st.markdown(
+            """
+            Le modèle CNN personnalisé que nous avons entraîné est malheureusement un échec : on observe un collapse rendant le modèle inutilisable.
+            Nous décidons donc d'entraîner un modèle Fine tuned Resnet avec une base de reconnaissance d'images déjà solide.
+            """
+        )
+        st.markdown(
+            """
+            #### Fine tuned Resnet
+
+            Le modèle Resnet18 est un modèle de reconnaissance d'images pré-entraîné sur le dataset ImageNet. Nous l'avons fine tuned sur notre dataset Rakuten afin de l'adapter à notre problématique.
+
+            | Stage | Layers | Details |
+            |-------|--------|---------|
+            | Input | Conv1 | 7x7 Conv, 64 filters, stride 2 + MaxPool |
+            | Block 1 | 2 layers | 2 x (3x3 Conv, 64) |
+            | Block 2 | 2 layers | 2 x (3x3 Conv, 128) |
+            | Block 3 | 2 layers | 2 x (3x3 Conv, 256) |
+            | Block 4 | 2 layers | 2 x (3x3 Conv, 512) |
+            | Output | FC | Fully Connected, 27 classes (or num_classes) |
+
+            Nous avons décidé de dégeler le dernier bloc et de fournir notre propre sortie pour la classification.
+            """
+        )
+        st.markdown("**Rapport de classification**")
+        resnet_report_main_data = {
+            "Class": [10, 40, 50, 60, 1140, 1160, 1180, 1280, 1281, 1300,
+              1301, 1302, 1320, 1560, 1920, 1940, 2060, 2220, 2280,
+              2403, 2462, 2522, 2582, 2583, 2585, 2705, 2905],
+            "Precision": [0.62, 0.58, 0.32, 0.59, 0.55, 0.84, 0.36, 0.28, 0.36, 0.56,
+                        0.37, 0.41, 0.35, 0.48, 0.73, 0.48, 0.45, 0.51, 0.53, 0.39,
+                        0.49, 0.56, 0.34, 0.61, 0.27, 0.62, 0.49],
+            "Recall": [0.24, 0.32, 0.19, 0.58, 0.37, 0.80, 0.15, 0.43, 0.07, 0.58,
+                    0.38, 0.20, 0.41, 0.48, 0.72, 0.59, 0.36, 0.13, 0.71, 0.71,
+                    0.30, 0.54, 0.36, 0.73, 0.20, 0.64, 0.49],
+            "F1-score": [0.35, 0.41, 0.24, 0.58, 0.45, 0.82, 0.21, 0.34, 0.11, 0.57,
+                        0.38, 0.27, 0.38, 0.48, 0.73, 0.53, 0.40, 0.20, 0.61, 0.51,
+                        0.37, 0.55, 0.35, 0.67, 0.23, 0.63, 0.49],
+            "Support": [623, 502, 336, 166, 534, 791, 153, 974, 414, 1009,
+                        161, 498, 648, 1015, 861, 161, 999, 165, 952, 955,
+                        284, 998, 518, 2042, 499, 552, 174]
+        }
+        st.dataframe(resnet_report_main_data, height=300)
+        resnet_report_acc_data = {
+            "Metric": ["Accuracy", "Macro avg", "Weighted avg"],
+            "Precision": [None, 0.49, 0.51],
+            "Recall": [None, 0.43, 0.50],
+            "F1-score": [0.50, 0.44, 0.49],
+            "Support": [16984, 16984, 16984]
+        }
+        st.dataframe(resnet_report_acc_data)
+        st.markdown("**Matrice de confusion**")
+        st.image("assets/heatmaps/resnet_confusion_matrix.png")
+        st.markdown(
+            """
+            Le modèle obtient une performance satisfaisante sachant que certaines images sont difficiles à classifier car certains types d'objets peuvent appartenir à plusieurs classes. Par exemple les figurines peuvent être classées comme des jouets ou des objets de collection de jeu vidéo.
+            """
+        )
