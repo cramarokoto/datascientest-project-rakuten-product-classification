@@ -23,10 +23,10 @@ def run():
         st.markdown("""
         On sait que la classe **2583 (accessoires de piscines)** est sur représentée dans le jeu de données.  
         Nous avons décidé de :
-        - faire de l'undersampling aléatoire pour diminuer sa présence à **3% au lieu de 12%**
-        - faire de l'oversampling aléatoire à **3% pour les classes minoritaires**
+        - faire de l'undersampling pour diminuer la présence de la classe majoritaire
+        - faire de l'oversampling aléatoire pour augmenter la présence des classes minoritaires
 
-        Cela permet d'équilibrer les classes présentes et **améliorer les performances** de l'apprentissage.  
+        Cela permet d'équilibrer toutes les classes à **3.7%** et d'améliorer les performances de l'apprentissage.
 
         ➡️ Le jeu de test, lui, reste inchangé et déséquilibré comme dans la réalité.
         """)
