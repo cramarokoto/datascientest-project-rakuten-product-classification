@@ -50,8 +50,8 @@ def run():
         logistic_regression_report_acc_data = {
             "metric": ["accuracy", "macro avg", "weighted avg"],
             "precision": [None, 0.70, 0.74],
-            "recall": [0.72, 0.72, 0.72],
-            "f1-score": [None, 0.70, 0.73],
+            "recall": [None, 0.72, 0.72],
+            "f1-score": [0.72, 0.70, 0.73],
             "support": [16984, 16984, 16984]
         }
         st.dataframe(logistic_regression_report_acc_data)
@@ -87,8 +87,8 @@ def run():
         random_forest_report_acc_data = {
             "metric": ["accuracy", "macro avg", "weighted avg"],
             "precision": [None, 0.76, 0.76],
-            "recall": [0.75, 0.74, 0.75],
-            "f1-score": [None, 0.74, 0.75],
+            "recall": [None, 0.74, 0.75],
+            "f1-score": [0.75, 0.74, 0.75],
             "support": [16984, 16984, 16984]
         }
         st.dataframe(random_forest_report_acc_data)
@@ -120,9 +120,9 @@ def run():
         st.dataframe(xgboost_report_main_data, height=300)
         xgboost_report_acc_data = {
             'Class': ['accuracy', 'macro avg', 'weighted avg'],
-            'precision': [ .75, 0.74, 0.75],
+            'precision': [ None, 0.74, 0.75],
             'recall': [None, 0.74, 0.75],
-            'f1-score': [None, 0.74, 0.75],
+            'f1-score': [.75, 0.74, 0.75],
             'support': [16984, 16984, 16984]
         }
         st.dataframe(xgboost_report_acc_data)
