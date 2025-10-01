@@ -21,8 +21,42 @@ def run():
         st.markdown("#### Logistic Regression")
         st.markdown(
             """
+            **Recherche d’hyperparamètres** : GridSearchCV (score F1 pondéré, validation croisée 3 plis)  
+            **Nombre total de fits** : 30  
+
+            | Paramètre | Scope de recherche          | Valeur optimale |
+            |-----------|----------------------------|----------------|
+            | solver    | ["lbfgs", "saga"]          | "saga"         |
+            | C         | [0.01, 0.1, 1, 10, 100]   | 100            |
+
+            **Temps d’exécution** : 78 min (4676 s) 
+
+            **Classification report** :  
             """
         )
+        logistic_regression_report_main_data = {
+            "class": [10, 40, 50, 60, 1140, 1160, 1180, 1280, 1281, 1300, 1301, 1302, 1320,
+              1560, 1920, 1940, 2060, 2220, 2280, 2403, 2462, 2522, 2582, 2583, 2585, 2705, 2905],
+            "precision": [0.33, 0.60, 0.67, 0.80, 0.68, 0.90, 0.40, 0.63, 0.43, 0.83, 0.84, 0.59, 0.65,
+                        0.77, 0.85, 0.61, 0.74, 0.60, 0.76, 0.80, 0.73, 0.86, 0.59, 0.96, 0.54, 0.73, 0.93],
+            "recall": [0.64, 0.54, 0.70, 0.86, 0.73, 0.86, 0.59, 0.41, 0.51, 0.84, 0.86, 0.65, 0.62,
+                    0.67, 0.87, 0.94, 0.64, 0.81, 0.71, 0.63, 0.74, 0.81, 0.69, 0.88, 0.69, 0.70, 0.97],
+            "f1-score": [0.44, 0.57, 0.69, 0.83, 0.71, 0.88, 0.47, 0.49, 0.47, 0.84, 0.85, 0.62, 0.63,
+                        0.72, 0.86, 0.74, 0.69, 0.69, 0.73, 0.71, 0.74, 0.84, 0.64, 0.92, 0.60, 0.71, 0.95],
+            "support": [623, 502, 336, 166, 534, 791, 153, 974, 414, 1009, 161, 498, 648,
+                        1015, 861, 161, 999, 165, 952, 955, 284, 998, 518, 2042, 499, 552, 174]
+        }
+        st.dataframe(logistic_regression_report_main_data, height=300)
+        logistic_regression_report_acc_data = {
+            "metric": ["accuracy", "macro avg", "weighted avg"],
+            "precision": [None, 0.70, 0.74],
+            "recall": [0.72, 0.72, 0.72],
+            "f1-score": [None, 0.70, 0.73],
+            "support": [16984, 16984, 16984]
+        }
+        st.dataframe(logistic_regression_report_acc_data)
+        st.markdown("**Confusion Matrix**")
+        st.image("assets/heatmaps/logistic_regression_text_confusion_matrix.png")
         st.markdown("#### Random Forest")
         st.markdown(
             """
