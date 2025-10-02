@@ -152,14 +152,12 @@ def run():
             ##### Hyperparamètres
             Nous avons exploré les hyperparamètres suivants avec HalvingGridSearchCV (score F1 pondéré, validation croisée 3 plis) :
 
-            | Paramètre | Ensemble 1   | Ensemble 2           | Valeur optimale |
+            | Paramètre | Ensemble 1   | Ensemble 2           | Valeur optimale   |
             |-----------|--------------|----------------------|-------------------|
             | C         | [0.1, 1, 10] | [0.1, 1, 10]         | 0.1               |
             | solver    | "lbfgs"      | "saga"               | "saga"            |
             | penalty   | "l2"         | ["l1", "elasticnet"] | "elasticnet"      |
             | l1_ratio  | -            | 0.5                  | 0.5               |
-
-            La régression logistique n'est pas assez performante pour la classification des images. Nous décidons donc d'entraîner un modèle CNN personnalisé au vu du nombre de données disponibles raisonnable.
             """
         )
         image_log_reg_report_acc_data = {
@@ -170,6 +168,8 @@ def run():
             "Support": [16984, 16984, 16984]
         }
         st.dataframe(image_log_reg_report_acc_data)
+        st.markdown("La régression logistique n'est pas assez performante pour la classification des images. Nous décidons donc d'entraîner un modèle CNN personnalisé au vu du nombre de données disponibles raisonnable.")
+
         with st.expander("Performance"):
             st.markdown("**Classification report**")
             image_log_reg_report_main_data = {
