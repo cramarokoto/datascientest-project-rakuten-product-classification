@@ -94,15 +94,15 @@ def run():
         st.markdown("#### Transformation des images")
         st.markdown("""
         Régression Logistique:
-        - Passage de **500×500 couleur** ➝ **200×200 niveaux de gris**  
+        - Passage de **500×500 en couleurs** ➝ **200×200 en niveaux de gris**  
         - Réduction mémoire : 750 000 valeurs ➝ 40 000 valeurs par image
         - Perte d'information (couleur, détails) compensée par gain en performance et coût calcul
                     
         CNN personnalisé:
-        - Passage de **500×500 couleur** ➝ **224×224 niveaux de gris**
+        - Passage de **500×500 en couleurs** ➝ **224×224 en niveaux de gris**
                     
         Resnet18:
-        - Passage de **500×500 couleur** ➝ **224×224 couleur**
+        - Passage de **500×500 en couleurs** ➝ **224×224 en couleurs**
         """)
 
         st.markdown("#### Alignement avec les données textuelles")
