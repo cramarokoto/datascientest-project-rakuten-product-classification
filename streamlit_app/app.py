@@ -6,7 +6,6 @@ import config
 
 from tabs import (
     intro,
-    equipe,
     exploration_donnees,
     preprocessing,
     modelisation,
@@ -32,7 +31,6 @@ st.markdown(f"<style>{style}</style>", unsafe_allow_html=True)
 TABS = OrderedDict(
     [
         (intro.sidebar_name, intro),
-        (equipe.sidebar_name, equipe),
         (exploration_donnees.sidebar_name, exploration_donnees),
         (preprocessing.sidebar_name, preprocessing),
         (modelisation.sidebar_name, modelisation),
