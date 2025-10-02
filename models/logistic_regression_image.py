@@ -229,12 +229,12 @@ def process_if_already_done():
     
     report = classification_report(y_test, y_pred, output_dict=True)
     print("Classification Report:\n", classification_report(y_test, y_pred))
-    with open("./models/cnn_image_classification_report.txt", "w") as f:
+    with open("./models/logistic_regression_image_report.txt", "w") as f:
         f.write(classification_report(y_test, y_pred))
 
     conf_matrix = confusion_matrix(y_test, y_pred)
     print("Confusion Matrix:\n", conf_matrix)
-    with open('./models/cnn_image_confusion_matrix.txt', 'w') as f:
+    with open('./models/logistic_regression_image_confusion_matrix.txt', 'w') as f:
         f.write(str(conf_matrix))
 
     ipca = full_data["ipca"]
@@ -254,4 +254,15 @@ def process_if_already_done():
 if __name__ == "__main__":
     # whole_process_and_training() # First run
     # process_if_already_done()  # Uncomment it's not the first run
+    full_data = joblib.load("./models/logistic_regression_image_full_data.pkl")
+
+    report = full_data["classification_report"]
+    print("Classification Report:\n", report)
+    with open("./models/logistic_regression_image_report.txt", "w") as f:
+        f.write(str(report))
+
+    conf_matrix = full_data["confusion_matrix"]
+    print("Confusion Matrix:\n", conf_matrix)
+    with open('./models/logistic_regression_image_confusion_matrix.txt', 'w') as f:
+        f.write(str(conf_matrix))
     pass
