@@ -93,15 +93,15 @@ def run():
     
         st.markdown("#### Transformation des images")
         st.markdown("""
-        Régression Logistique:
+        **Régression Logistique :**
         - Passage de **500×500 en couleurs** ➝ **200×200 en niveaux de gris**  
         - Réduction mémoire : 750 000 valeurs ➝ 40 000 valeurs par image
         - Perte d'information (couleur, détails) compensée par gain en performance et coût calcul
                     
-        CNN personnalisé:
+        **CNN personnalisé :**
         - Passage de **500×500 en couleurs** ➝ **224×224 en niveaux de gris**
                     
-        Resnet18:
+        **Resnet18 :**
         - Passage de **500×500 en couleurs** ➝ **224×224 en couleurs**
         """)
 
@@ -120,7 +120,7 @@ def run():
 
         st.markdown("#### Réduction de dimension")
         st.markdown("""
-        Régression Logistique:
+        Régression Logistique :
         - **PCA incrémental**: 40 000 features ➝ 256 features
         """)
 
@@ -134,11 +134,11 @@ def run():
  
         st.markdown("#### Alternatives envisagées")
         st.markdown("""
-        Régression Logistique:
+        **Régression Logistique :**
         - Conserver les couleurs 
         - Appliquer un PCA sur des données non réduites
         - Comparer **info en gris avec plus de pixels** vs **info en couleurs avec moins de pixels**
                     
-        CNN personnalisé:
+        **CNN personnalisé :**
         - Comparer **info en gris** vs **info en couleurs**
         """)
