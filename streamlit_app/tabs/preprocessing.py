@@ -42,7 +42,7 @@ def run():
         }
         df_classes = pd.DataFrame(data)
 
-        st.dataframe(df_classes)
+        st.dataframe(df_classes, height=250)
 
     with tab2:
         st.markdown("#### Création de la variable `has_description`")
