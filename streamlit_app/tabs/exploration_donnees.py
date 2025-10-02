@@ -284,44 +284,43 @@ def run():
     with tab4:
         st.markdown("#### Stratégie MLFlow proposée")
 
-        st.markdown("##### Préparation des données")
-        st.markdown("""
-        - Diviser **X_train** et **y_train** en ensembles d'entraînement et de test avec la même répartition.  
-        - Décider si les descriptions nulles doivent être remplacées par des descriptions générées (ex. à partir de la désignation ou de mots-clés).
-        """)
+        with st.expander("Préparation des données"):
+            st.markdown("""
+            - Diviser **X_train** et **y_train** en ensembles d'entraînement et de test avec la même répartition.  
+            - Décider si les descriptions nulles doivent être remplacées par des descriptions générées (ex. à partir de la désignation ou de mots-clés).
+            """)
+        with st.expander("Modélisation texte"):
+            st.markdown("""
+            - Construire un modèle de classification des produits basé sur le texte.  
+            - Intégrer des traitements NLP sur la désignation et la description.
+            """)
 
-        st.markdown("##### Modélisation texte")
-        st.markdown("""
-        - Construire un modèle de classification des produits basé sur le texte.  
-        - Intégrer des traitements NLP sur la désignation et la description.
-        """)
+        with st.expander("Modélisation images"):
+            st.markdown("""
+            - Appliquer des techniques de Computer Vision pour harmoniser le dataset d'images.  
+            - Transformer les images en vecteurs de pixels associés aux produits.  
+            - Construire un modèle de classification des produits à partir des images.
+            """)
 
-        st.markdown("##### Modélisation images")
-        st.markdown("""
-        - Appliquer des techniques de Computer Vision pour harmoniser le dataset d'images.  
-        - Transformer les images en vecteurs de pixels associés aux produits.  
-        - Construire un modèle de classification des produits à partir des images.
-        """)
+        with st.expander("Évaluation et amélioration"):
+            st.markdown("""
+            - Évaluer les performances des modèles texte et image.  
+            - Ajuster et optimiser ces modèles pour améliorer les performances.
+            """)
 
-        st.markdown("##### Évaluation et amélioration")
-        st.markdown("""
-        - Évaluer les performances des modèles texte et image.  
-        - Ajuster et optimiser ces modèles pour améliorer les performances.
-        """)
+        with st.expander("Fusion des modèles"):
+            st.markdown("""
+            - Définir des pondérations pour les modèles en fonction de leurs performances respectives.  
+            - Créer une fonction pour calculer une moyenne pondérée des probabilités des classes (comme en Bagging).  
+            - Évaluer la classification finale basée sur cette moyenne pondérée pendant la phase de test.  
+            - Optimiser les pondérations pour améliorer les résultats.
+            """)
 
-        st.markdown("##### Fusion des modèles")
-        st.markdown("""
-        - Définir des pondérations pour les modèles en fonction de leurs performances respectives.  
-        - Créer une fonction pour calculer une moyenne pondérée des probabilités des classes (comme en Bagging).  
-        - Évaluer la classification finale basée sur cette moyenne pondérée pendant la phase de test.  
-        - Optimiser les pondérations pour améliorer les résultats.
-        """)
-
-        st.markdown("##### Conclusion")
-        st.markdown("""
-        - Comparer les performances du modèle combiné avec celles des meilleurs modèles individuels.  
-        - Conclure sur la solution la plus efficace entre modèle seul et combinaison.
-        """)
+        with st.expander("Conclusion"):
+            st.markdown("""
+            - Comparer les performances du modèle combiné avec celles des meilleurs modèles individuels.  
+            - Conclure sur la solution la plus efficace entre modèle seul et combinaison.
+            """)
     with tab5:
         st.write("Voici un échantillon de données pour chaque catégorie de produit : nous affichons la catégorie, la designation, la description et l'image.")
 
