@@ -145,23 +145,19 @@ def run():
                     
         Cette réduction de dimension permet de diminuer drastiquement le temps d’entraînement de la régression logistique. Cependant, nous avions déjà eu une perte d'information en passant de 500x500 en couleurs à 200x200 en niveaux de gris.
                     
-        Pour des résultats optimaux en évitant une double perte d'information, nous aurions pu appliquer ce même PCA sur les images 500x500 en couleurs mais le PCA aussi est couteux. La logreg étant surtout à but exploratoire, nous avons conservé cette approche.
+        Pour des résultats optimaux en évitant une double perte d'information, nous aurions pu appliquer ce même PCA sur les images 500x500 en couleurs mais le PCA aussi est coûteux. La logreg étant surtout à but exploratoire, nous avons conservé cette approche.
         """)
         st.markdown(
             """
-            ##### Méthodologie
-            Nous avons exploré les hyperparamètres suivants :
-            - D’une part:
-                - C : [0.1, 1, 10]
-                - solver : “lbfgs”
-                - penalty : “l2”
-            - D’autre part:
-                - C : [0.1, 1, 10]
-                - solver : “saga”
-                - penalty : [“l1”, “elasticnet”]
-                - l1_ratio : 0.5
+            ##### Hyperparamètres
+            Nous avons exploré les hyperparamètres suivants avec HalvingGridSearchCV (score F1 pondéré, validation croisée 3 plis) :
 
-            La régression logistique n'est pas assez performante pour la classification des images. Nous décidons donc d'entraîner un modèle CNN personnalisé au vu du nombre de données disponibles raisonnable.
+            | Paramètre | Scope de recherche                                         | Valeur optimale |
+            |-----------|------------------------------------------------------------|-----------------|
+            | C         | [0.1, 1, 10]                                               | 0.1             |
+            | solver    | [“lbfgs”, "saga"]                                          | saga            |
+            | penalty   | “l2” pour solver "lbfgs"; [“l1”, “elasticnet”] pour "saga" | elasticnet      |
+            | l1_ratio  | 0.5 pour solver "saga"                                     | 0.5             |
 
             **Rapport de classification**
             """
@@ -190,6 +186,9 @@ def run():
             "Support": [16984, 16984, 16984]
         }
         st.dataframe(image_log_reg_report_acc_data)
+
+        st.markdown("La régression logistique n'est pas assez performante pour la classification des images. Nous décidons donc d'entraîner un modèle CNN personnalisé au vu du nombre de données disponibles raisonnable.")
+
         st.markdown("#### CNN Keras")
         st.markdown(
             """

@@ -15,15 +15,8 @@ def run():
 
     st.header("Présentation du projet")
     st.write("""
-    Ce projet propose une classification automatique des produits du catalogue Rakuten France, 
+    Ce projet consiste en l'élaboration d'un modèle robuste pour effectuer de la classification automatique de produits issus du catalogue du site e-commerce Rakuten France, 
     utilisant à la fois les données textuelles (titre et description) et les images fournies pour chaque article.
-    """)
-
-    st.header("Objectif")
-    st.write("""
-    L'enjeu est de prédire le type de chaque produit parmi de nombreuses catégories, 
-    en relevant des défis tels que la diversité, le bruit des données réelles de e-commerce, 
-    et le fort déséquilibre des classes. Nous avons expérimenté différentes approches de machine learning pour résoudre ce problème en exploitant l'ensemble des données disponibles.
     """)
 
     st.header("En savoir plus")
