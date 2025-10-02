@@ -341,9 +341,9 @@ def load_sampled_paths_data(test_size=0.2, random_state=42):
 
     X_test = prepare_images_df(X_test, n_images=None, split="train", random_state=random_state)
 
-    train_sampled_df = X_train_sampled.merge(y_train_sampled, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
+    train_sampled_df = X_train_sampled.merge(y_train_sampled, left_index=True, right_index=True)[["processed_image_path", "image_path", "prdtypecode"]]
 
-    test_df = X_test.merge(y_test, left_index=True, right_index=True)[["processed_image_path", "prdtypecode"]]
+    test_df = X_test.merge(y_test, left_index=True, right_index=True)[["processed_image_path", "image_path", "prdtypecode"]]
 
     return train_sampled_df, test_df
 
