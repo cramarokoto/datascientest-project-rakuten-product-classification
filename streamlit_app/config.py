@@ -7,7 +7,7 @@ Config file for Streamlit App
 from member import Member
 
 
-TITLE = "My Awesome App"
+TITLE = "Classification de produits Rakuten"
 
 TEAM_MEMBERS = [
     Member(
