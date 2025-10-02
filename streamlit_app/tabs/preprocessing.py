@@ -74,7 +74,13 @@ def run():
 
         st.markdown("#### Application de TF-IDF")
         st.markdown("""
-        Choix :
+        Ce traitement est adapté à nos contraintes car :
+        - simple
+        - immédiat
+        - ne nécessitant pas de GPU
+        - fonctionnant avec un corpus peu volumineux
+
+        Paramètres :
         - 10 000 features
         - n-gram (1,1)
         - min 10 documents
