@@ -132,7 +132,7 @@ def run():
         - Préserver autant que possible l’information utile
         """)
  
-        st.markdown("#### Alternative envisagée")
+        st.markdown("#### Alternatives envisagées")
         st.markdown("""
         Régression Logistique:
         - Conserver les couleurs 
