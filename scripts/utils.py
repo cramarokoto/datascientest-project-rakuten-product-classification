@@ -8,6 +8,9 @@ import pandas as pd
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
+from sklearn.utils import resample
 
 import numpy as np
 
@@ -26,6 +29,18 @@ from collections import Counter
 from imblearn.pipeline import Pipeline
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler
+
+# Text processing
+import re
+from bs4 import BeautifulSoup
+from nltk.corpus import stopwords
+
+# PyTorch
+import torch
+from torch.utils.data import Dataset, DataLoader
+from torchvision import models, transforms
+from torchvision.models import ResNet18_Weights
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -420,3 +435,589 @@ def export_model(model_name, model):
     """
     print("Saving model")
     joblib.dump(model, f'./models/{model_name}_model.pkl')
+
+
+#####################################
+############# TEXT UTILS ############
+#####################################
+
+# Stopwords for text cleaning
+STOP_WORDS = set(stopwords.words('english')).union(set(stopwords.words('french')))
+
+def clean_text(text):
+    """Remove HTML tags, special characters, and stopwords"""
+    # Remove HTML
+    text = BeautifulSoup(str(text), "html.parser").get_text()
+    # Convert to lowercase
+    text = text.lower()
+    # Keep only letters and spaces
+    text = re.sub(r'[^a-z\s]', '', text)
+    # Remove stopwords
+    words = [w for w in text.split() if w not in STOP_WORDS]
+    return " ".join(words)
+
+
+def create_text_features(train_data, val_data, test_data, tfidf_features=10000, svd_components=300):
+    """
+    Create text features using TF-IDF and SVD dimensionality reduction.
+    
+    Args:
+        train_data, val_data, test_data: DataFrames with 'text' column
+        tfidf_features: Number of TF-IDF features to extract
+        svd_components: Number of SVD components for dimensionality reduction
+        
+    Returns:
+        tuple: (tfidf_vectorizer, svd_transformer, X_train_text, X_val_text, X_test_text)
+    """
+    # TF-IDF vectorization
+    tfidf = TfidfVectorizer(max_features=tfidf_features)
+    X_train_tfidf = tfidf.fit_transform(train_data['text'])
+    X_val_tfidf = tfidf.transform(val_data['text'])
+    X_test_tfidf = tfidf.transform(test_data['text'])
+    
+    # Dimensionality reduction with SVD
+    svd = TruncatedSVD(n_components=svd_components, random_state=42)
+    X_train_text = svd.fit_transform(X_train_tfidf).astype(np.float32)
+    X_val_text = svd.transform(X_val_tfidf).astype(np.float32)
+    X_test_text = svd.transform(X_test_tfidf).astype(np.float32)
+    
+    return tfidf, svd, X_train_text, X_val_text, X_test_text
+
+
+#####################################
+############# PYTORCH UTILS ########
+#####################################
+
+class ProductImageDataset(Dataset):
+    """Dataset for loading product images"""
+    def __init__(self, dataframe, transform=None):
+        self.df = dataframe.reset_index(drop=True)
+        self.transform = transform
+    
+    def __len__(self):
+        return len(self.df)
+    
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+        img_path = image_path(int(row['imageid']), int(row['productid']), split="train")
+        image = Image.open(img_path).convert('RGB')
+        
+        if self.transform:
+            image = self.transform(image)
+        
+        label = row['label_encoded']
+        return image, label
+
+
+class ProductMultimodalDataset(Dataset):
+    """Dataset for loading product images and text features"""
+    def __init__(self, dataframe, text_features, transform=None):
+        self.df = dataframe.reset_index(drop=True)
+        self.text_features = text_features
+        self.transform = transform
+    
+    def __len__(self):
+        return len(self.df)
+    
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+        img_path = image_path(int(row['imageid']), int(row['productid']), split="train")
+        image = Image.open(img_path).convert('RGB')
+        
+        if self.transform:
+            image = self.transform(image)
+        
+        # Get text features for this sample
+        text_feat = self.text_features[idx]
+        
+        label = row['label_encoded']
+        return image, text_feat, label
+
+
+def get_image_transforms():
+    """Get standard image transforms for training and validation"""
+    train_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.RandomRotation(20),
+        transforms.ColorJitter(0.3, 0.3, 0.3, 0.15),
+        transforms.RandomAffine(degrees=15, translate=(0.1, 0.1)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+    
+    val_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+    
+    return train_transform, val_transform
+
+
+def create_resnet18_model(n_classes, freeze_layers=True):
+    """Create a ResNet18 model for classification"""
+    model = models.resnet18(weights=ResNet18_Weights.DEFAULT)
+    
+    if freeze_layers:
+        # Freeze all layers except layer4
+        for param in model.parameters():
+            param.requires_grad = False
+        for param in model.layer4.parameters():
+            param.requires_grad = True
+    
+    # Replace final FC layer
+    model.fc = torch.nn.Sequential(
+        torch.nn.Dropout(0.5),
+        torch.nn.Linear(model.fc.in_features, n_classes)
+    )
+    for param in model.fc.parameters():
+        param.requires_grad = True
+    
+    return model
+
+
+def create_multimodal_model(text_dim, num_classes, img_embed_dim=512, text_embed_dim=256, fusion_dim=256):
+    """Create a multimodal fusion model (ResNet18 + Text)"""
+    import torch.nn as nn
+    
+    class MultiModalNet(nn.Module):
+        def __init__(self, text_dim, num_classes):
+            super().__init__()
+            
+            # ========================================
+            # IMAGE BRANCH (ResNet18 with fine-tuning)
+            # ========================================
+            self.resnet = models.resnet18(weights=ResNet18_Weights.DEFAULT)
+            
+            # Freeze early layers, unfreeze layer3 and layer4
+            for param in self.resnet.parameters():
+                param.requires_grad = False
+            
+            for param in self.resnet.layer4.parameters():
+                param.requires_grad = True
+            
+            # Remove final FC layer to get 512-dim features
+            self.resnet.fc = nn.Identity()
+            
+            # Image projection with batch norm
+            self.img_projection = nn.Sequential(
+                nn.Linear(512, img_embed_dim),
+                nn.BatchNorm1d(img_embed_dim),
+                nn.ReLU(),
+                nn.Dropout(0.4)
+            )
+        
+            # In-model augmentation pipeline (applied during training)
+            self.train_augment = transforms.Compose([
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomAffine(degrees=15, translate=(0.10, 0.10), scale=(0.90, 1.10))
+            ])
+            
+            # ========================================
+            # TEXT BRANCH (Optimized for TF-IDF+SVD features)
+            # ========================================
+            # TF-IDF+SVD features are already dense and informative
+            # Use shallower network with higher capacity
+            self.text_fc = nn.Sequential(
+                nn.Linear(text_dim, 512),
+                nn.BatchNorm1d(512),
+                nn.ReLU(),
+                nn.Dropout(0.4),
+                
+                nn.Linear(512, text_embed_dim),
+                nn.BatchNorm1d(text_embed_dim),
+            )
+            
+            # ========================================
+            # FUSION & CLASSIFIER
+            # ========================================
+            combined_dim = img_embed_dim + text_embed_dim
+            
+            # Fusion layer with residual connection (dimensions match)
+            self.fusion_layer = nn.Sequential(
+                nn.Linear(combined_dim, combined_dim),
+                nn.BatchNorm1d(combined_dim),
+                nn.ReLU(),
+                nn.Dropout(0.5)
+            )
+            
+            # Final classifier
+            self.classifier = nn.Sequential(
+                nn.Linear(combined_dim, combined_dim // 2),
+                nn.BatchNorm1d(combined_dim // 2),
+                nn.ReLU(),
+                nn.Dropout(0.4),
+                
+                nn.Linear(combined_dim // 2, combined_dim // 4),
+                nn.BatchNorm1d(combined_dim // 4),
+                nn.ReLU(),
+                nn.Dropout(0.4),
+                
+                nn.Linear(combined_dim // 4, num_classes)
+            )
+        
+        def forward(self, img, text_vec):
+            # Extract features from both modalities
+            img_feat = self.resnet(img)
+            img_feat = self.img_projection(img_feat)
+            
+            text_feat = self.text_fc(text_vec)
+            
+            # Concatenate features
+            combined = torch.cat([img_feat, text_feat], dim=1)
+            
+            # Fusion with residual connection
+            fused = self.fusion_layer(combined) + combined
+            
+            # Final classification
+            output = self.classifier(fused)
+            return output
+    
+    return MultiModalNet(text_dim, num_classes)
+
+
+def train_pytorch_model(model, train_loader, val_loader, device, epochs=5, learning_rate=0.0005, patience=2):
+    """Train a PyTorch model with early stopping"""
+    import torch.nn as nn
+    import torch.optim as optim
+    
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=learning_rate, weight_decay=1e-3)
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', patience=patience, factor=0.5)
+    
+    best_val_loss = float('inf')
+    patience_counter = 0
+    
+    for epoch in range(epochs):
+        # Training phase
+        model.train()
+        running_loss = 0.0
+        correct = 0
+        total = 0
+        
+        for images, labels in train_loader:
+            images, labels = images.to(device), labels.to(device)
+            
+            optimizer.zero_grad()
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            
+            running_loss += loss.item() * images.size(0)
+            _, predicted = outputs.max(1)
+            correct += (predicted == labels).sum().item()
+            total += labels.size(0)
+        
+        train_acc = correct / total
+        train_loss = running_loss / total
+        
+        # Validation phase
+        model.eval()
+        val_loss = 0.0
+        val_correct = 0
+        val_total = 0
+        
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+                
+                val_loss += loss.item()
+                _, predicted = outputs.max(1)
+                val_correct += (predicted == labels).sum().item()
+                val_total += labels.size(0)
+        
+        avg_val_loss = val_loss / len(val_loader)
+        val_acc = val_correct / val_total
+        
+        print(f"Epoch {epoch+1}/{epochs} - Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {avg_val_loss:.4f}, Val Acc: {val_acc:.4f}")
+        
+        # Learning rate scheduling
+        scheduler.step(avg_val_loss)
+        
+        # Early stopping check
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            patience_counter = 0
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print("✓ Early stopping triggered 🚦")
+                break
+    
+    return model
+
+
+def get_model_predictions(model, loader, device):
+    """Get probability predictions from a PyTorch model"""
+    model.eval()
+    all_probs = []
+    
+    with torch.no_grad():
+        for images, _ in loader:
+            images = images.to(device)
+            outputs = model(images)
+            probs = torch.softmax(outputs, dim=1)
+            all_probs.append(probs.cpu().numpy())
+    
+    return np.vstack(all_probs)
+
+
+def get_multimodal_predictions(model, loader, device):
+    """Get predictions from multimodal model (image + text)"""
+    model.eval()
+    all_preds = []
+    all_probs = []
+    
+    with torch.no_grad():
+        for images, text_features, _ in loader:
+            images = images.to(device)
+            text_features = text_features.to(device)
+            outputs = model(images, text_features)
+            probs = torch.softmax(outputs, dim=1)
+            _, predicted = outputs.max(1)
+            
+            all_preds.append(predicted.cpu().numpy())
+            all_probs.append(probs.cpu().numpy())
+    
+    return np.concatenate(all_preds), np.vstack(all_probs)
+
+
+def setup_image_data_loaders(train_data, val_data, test_data, batch_size=32, num_workers=2):
+    """Setup data loaders for image-only training (used by late_fusion and stacking models)"""
+    train_transform, val_transform = get_image_transforms()
+    
+    # Create datasets
+    train_dataset = ProductImageDataset(train_data, train_transform)
+    val_dataset = ProductImageDataset(val_data, val_transform)
+    test_dataset = ProductImageDataset(test_data, val_transform)
+    
+    # Create dataloaders
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    
+    print(f"✓ Train batches: {len(train_loader)}")
+    print(f"✓ Val batches: {len(val_loader)}")
+    print(f"✓ Test batches: {len(test_loader)}")
+    
+    return train_loader, val_loader, test_loader
+
+
+def setup_multimodal_data_loaders(train_data, val_data, test_data, X_train_text, X_val_text, X_test_text, batch_size=32, num_workers=2):
+    """Setup data loaders for multimodal training (used by fusion model)"""
+    train_transform, val_transform = get_image_transforms()
+    
+    # Create datasets
+    train_dataset = ProductMultimodalDataset(train_data, X_train_text, train_transform)
+    val_dataset = ProductMultimodalDataset(val_data, X_val_text, val_transform)
+    test_dataset = ProductMultimodalDataset(test_data, X_test_text, val_transform)
+    
+    # Create dataloaders
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    
+    print(f"✓ Train batches: {len(train_loader)}")
+    print(f"✓ Val batches: {len(val_loader)}")
+    print(f"✓ Test batches: {len(test_loader)}")
+    
+    return train_loader, val_loader, test_loader
+
+
+def evaluate_predictions(y_pred_encoded, y_true_encoded, label_encoder, val_data, test_data, model_name="Model"):
+    """Generic function to evaluate predictions and return decoded results"""
+    # Decode predictions to original labels
+    y_pred = label_encoder.inverse_transform(y_pred_encoded)
+    
+    # Get true labels
+    y_true = test_data['prdtypecode'].values
+    
+    # Calculate accuracy
+    accuracy = (y_pred == y_true).mean()
+    
+    print(f"✓ {model_name} Test Accuracy: {accuracy:.4f}")
+    
+    return y_pred, y_true
+
+
+def evaluate_multimodal_model(model, val_loader, test_loader, val_data, test_data, label_encoder, device):
+    """Evaluate multimodal model and return predictions"""
+    # Get predictions for validation and test sets
+    y_pred_val_encoded, val_probs = get_multimodal_predictions(model, val_loader, device)
+    y_pred_test_encoded, test_probs = get_multimodal_predictions(model, test_loader, device)
+    
+    # Decode predictions to original labels
+    y_pred_val = label_encoder.inverse_transform(y_pred_val_encoded)
+    y_pred_test = label_encoder.inverse_transform(y_pred_test_encoded)
+    
+    # Get true labels
+    y_true_val = val_data['prdtypecode'].values
+    y_true_test = test_data['prdtypecode'].values
+    
+    # Calculate accuracies
+    val_accuracy = (y_pred_val == y_true_val).mean()
+    test_accuracy = (y_pred_test == y_true_test).mean()
+    
+    print(f"✓ Validation Accuracy: {val_accuracy:.4f}")
+    print(f"✓ Test Accuracy: {test_accuracy:.4f}")
+    
+    return y_pred_test, y_true_test
+
+
+def train_multimodal_model(model, train_loader, val_loader, device, epochs=5, learning_rate=0.0005, patience=2):
+    """Train a multimodal PyTorch model with early stopping"""
+    import torch.nn as nn
+    import torch.optim as optim
+    import copy
+    
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=5e-4)
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5)
+    
+    best_val_loss = float('inf')
+    best_state_dict = None
+    patience_counter = 0
+    
+    for epoch in range(epochs):
+        # Training phase
+        model.train()
+        running_loss = 0.0
+        correct = 0
+        total = 0
+        
+        for images, text_features, labels in train_loader:
+            images = images.to(device)
+            text_features = text_features.to(device)
+            labels = labels.to(device)
+            
+            optimizer.zero_grad()
+            outputs = model(images, text_features)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            
+            running_loss += loss.item() * images.size(0)
+            _, predicted = outputs.max(1)
+            correct += (predicted == labels).sum().item()
+            total += labels.size(0)
+        
+        train_acc = correct / total
+        train_loss = running_loss / total
+        
+        # Validation phase
+        model.eval()
+        val_loss = 0.0
+        val_correct = 0
+        val_total = 0
+        
+        with torch.no_grad():
+            for images, text_features, labels in val_loader:
+                images = images.to(device)
+                text_features = text_features.to(device)
+                labels = labels.to(device)
+                outputs = model(images, text_features)
+                loss = criterion(outputs, labels)
+                
+                val_loss += loss.item()
+                _, predicted = outputs.max(1)
+                val_correct += (predicted == labels).sum().item()
+                val_total += labels.size(0)
+        
+        avg_val_loss = val_loss / len(val_loader)
+        val_acc = val_correct / val_total
+        
+        print(f"Epoch {epoch+1}/{epochs} - Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {avg_val_loss:.4f}, Val Acc: {val_acc:.4f}")
+        
+        # Learning rate scheduling
+        scheduler.step(avg_val_loss)
+        
+        # Early stopping check and best checkpoint tracking
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            patience_counter = 0
+            best_state_dict = copy.deepcopy(model.state_dict())
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print("✓ Early stopping triggered 🚦")
+                break
+    
+    # Restore best model weights if available
+    if best_state_dict is not None:
+        model.load_state_dict(best_state_dict)
+        print("✓ Restored best validation checkpoint")
+    
+    return model
+
+
+#####################################
+########## DATA PREPROCESSING #######
+#####################################
+
+def prepare_multimodal_data(tfidf_features=10000, svd_components=300, target_samples_pct=0.037):
+    """
+    Complete data preprocessing pipeline for multimodal models.
+    
+    Returns:
+        tuple: (train_data, val_data, test_data, label_encoder, n_classes, 
+                tfidf, svd, X_train_text, X_val_text, X_test_text)
+    """
+    # Load data
+    X, y, _ = load_data()
+    data = X.merge(y, left_index=True, right_index=True)
+    print(f"✓ Total samples: {len(data)}")
+    
+    # Encode labels
+    label_encoder = LabelEncoder()
+    data['label_encoded'] = label_encoder.fit_transform(data['prdtypecode'])
+    n_classes = len(label_encoder.classes_)
+    print(f"✓ Number of classes: {n_classes}")
+    
+    # Split train/val/test (60/20/20)
+    train_data, temp_data = train_test_split(
+        data, test_size=0.4, random_state=42, stratify=data['label_encoded']
+    )
+    val_data, test_data = train_test_split(
+        temp_data, test_size=0.5, random_state=42, stratify=temp_data['label_encoded']
+    )
+    print(f"✓ Train: {len(train_data)} samples")
+    print(f"✓ Val: {len(val_data)} samples")
+    print(f"✓ Test: {len(test_data)} samples")
+    
+    # Resample train set
+    target_count = int(len(train_data) * target_samples_pct)
+    print(f"✓ Target samples per class: {target_count}")
+    
+    balanced_train = []
+    for class_label in train_data['label_encoded'].unique():
+        class_data = train_data[train_data['label_encoded'] == class_label]
+        resampled = resample(class_data, n_samples=target_count, random_state=42, replace=True)
+        balanced_train.append(resampled)
+    
+    train_data = pd.concat(balanced_train).sample(frac=1, random_state=42).reset_index(drop=True)
+    print(f"✓ Train after resampling: {len(train_data)} samples")
+    
+    # Add boolean flag for description presence (1 if present, 0 if NA) after split/resampling
+    train_data['has_description'] = train_data['description'].notna().astype(np.int8)
+    val_data['has_description'] = val_data['description'].notna().astype(np.int8)
+    test_data['has_description'] = test_data['description'].notna().astype(np.int8)
+
+    # Preprocess text
+    train_data['text'] = (train_data['designation'] + ' ' + train_data['description']).apply(clean_text)
+    val_data['text'] = (val_data['designation'] + ' ' + val_data['description']).apply(clean_text)
+    test_data['text'] = (test_data['designation'] + ' ' + test_data['description']).apply(clean_text)
+    print("✓ Text preprocessing complete")
+    
+    # Create text features
+    tfidf, svd, X_train_text, X_val_text, X_test_text = create_text_features(
+        train_data, val_data, test_data, tfidf_features, svd_components
+    )
+    print(f"✓ TF-IDF features: {tfidf_features}")
+    print(f"✓ SVD components: {svd_components}")
+    print(f"✓ Final text feature shape: {X_train_text.shape}")
+    
+    return (train_data, val_data, test_data, label_encoder, n_classes, 
+            tfidf, svd, X_train_text, X_val_text, X_test_text)

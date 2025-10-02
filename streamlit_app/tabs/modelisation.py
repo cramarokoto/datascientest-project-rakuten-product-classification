@@ -280,7 +280,7 @@ def run():
 
     with tab3:
         st.markdown("""
-        Nous avons testé deux modèles multimodaux simples : le late fusion et le stacking.
+        Nous avons testé deux modèles multimodaux simples : le late fusion et le stacking et un modèle plus complexe : une feature‑level fusion.
         """)
         st.markdown("##### Late Fusion")
         st.markdown("""
@@ -352,3 +352,39 @@ def run():
             st.dataframe(stacking_report_main_data, height=250)
             st.markdown("**Matrice de confusion**")
             st.image("assets/heatmaps/stacking_confusion_matrix.png")
+
+        st.markdown("##### Feature‑level fusion")
+        st.markdown(
+            """
+            Le modèle a deux branches: une pour l’image (ResNet18) et une pour le texte (TF‑IDF + SVD), chacune produisant un embedding. Il fusionne ces caractéristiques en concaténant ces embeddings puis les passe par une couche de fusion et une tête de classification entraînées conjointement.
+            
+            Cette architecture apprend à combiner les signaux visuels et textuels pour prédire la classe.
+
+            Malgré la complexité de l'architecture, le modèle atteint un score de 0.73, ce qui reste inférieur au modèle XGBoost textuel seul.
+            """
+        )
+        feature_fusion_report_acc_data = {
+            "metric": ["accuracy", "macro avg", "weighted avg"],
+            "precision": [None, 0.71, 0.74],
+            "recall": [None, 0.73, 0.73],
+            "f1-score": [0.73, 0.72, 0.73],
+            "support": [16984, 16984, 16984]
+        }
+        st.dataframe(feature_fusion_report_acc_data)
+        with st.expander("Performance"):
+            st.markdown("**Rapport de classification**")
+            feature_fusion_report_main_data = {
+                "class": [10, 40, 50, 60, 1140, 1160, 1180, 1280, 1281, 1300, 1301, 1302, 1320,
+                        1560, 1920, 1940, 2060, 2220, 2280, 2403, 2462, 2522, 2582, 2583, 2585, 2705, 2905],
+                "precision": [0.50, 0.63, 0.59, 0.87, 0.64, 0.90, 0.38, 0.65, 0.49, 0.79, 0.84, 0.59, 0.58,
+                            0.79, 0.87, 0.88, 0.73, 0.83, 0.73, 0.71, 0.44, 0.77, 0.67, 0.95, 0.69, 0.69, 0.98],
+                "recall": [0.57, 0.66, 0.75, 0.88, 0.69, 0.88, 0.46, 0.40, 0.45, 0.84, 0.89, 0.72, 0.70,
+                        0.75, 0.86, 0.88, 0.72, 0.79, 0.73, 0.50, 0.59, 0.81, 0.73, 0.88, 0.71, 0.87, 0.96],
+                "f1-score": [0.53, 0.64, 0.66, 0.88, 0.66, 0.89, 0.41, 0.49, 0.47, 0.81, 0.86, 0.65, 0.64,
+                            0.77, 0.86, 0.88, 0.72, 0.81, 0.73, 0.58, 0.50, 0.79, 0.70, 0.92, 0.70, 0.77, 0.97],
+                "support": [624, 501, 336, 166, 534, 791, 153, 974, 414, 1009, 161, 498, 649,
+                            1015, 861, 160, 999, 165, 952, 955, 284, 998, 518, 2042, 499, 552, 174]
+            }
+            st.dataframe(feature_fusion_report_main_data, height=250)
+            st.markdown("**Matrice de confusion**")
+            st.image("assets/heatmaps/fusion_confusion_matrix.png")
