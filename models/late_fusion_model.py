@@ -179,7 +179,7 @@ def main():
     print("-" * 80)
     
     xgb_model = xgb.XGBClassifier(
-        n_estimators=300,
+        n_estimators=200,
         max_depth=3,
         learning_rate=0.2,
         random_state=42,
@@ -208,6 +208,8 @@ def main():
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(15),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
@@ -253,7 +255,10 @@ def main():
         param.requires_grad = True
     
     # Replace final FC layer
-    model.fc = nn.Linear(model.fc.in_features, n_classes)
+    model.fc = nn.Sequential(
+        nn.Dropout(0.5),
+        nn.Linear(model.fc.in_features, n_classes)
+    )
     for param in model.fc.parameters():
         param.requires_grad = True
     
@@ -263,7 +268,7 @@ def main():
     
     # Define loss and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001)
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.0005, weight_decay=1e-3)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5)
     
     # -----------------------------
