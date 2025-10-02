@@ -237,16 +237,7 @@ def run():
 
             Le modèle Resnet18 est un modèle de reconnaissance d'images pré-entraîné sur le dataset ImageNet. Nous l'avons fine tuned sur notre dataset Rakuten afin de l'adapter à notre problématique.
 
-            | Stage | Layers | Details |
-            |-------|--------|---------|
-            | Input | Conv1 | 7x7 Conv, 64 filters, stride 2 + MaxPool |
-            | Block 1 | 2 layers | 2 x (3x3 Conv, 64) |
-            | Block 2 | 2 layers | 2 x (3x3 Conv, 128) |
-            | Block 3 | 2 layers | 2 x (3x3 Conv, 256) |
-            | Block 4 | 2 layers | 2 x (3x3 Conv, 512) |
-            | Output | FC | Fully Connected, 27 classes (or num_classes) |
-
-            Nous avons décidé de dégeler le dernier bloc et de fournir notre propre sortie pour la classification.
+            Nous avons décidé de dégeler le dernier bloc et de fournir notre propre couche fully connected pour la classification à 27 classes.
             """
         )
         resnet_report_acc_data = {
