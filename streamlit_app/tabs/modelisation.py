@@ -151,37 +151,17 @@ def run():
             """
             ##### Méthodologie
             Nous avons exploré les hyperparamètres suivants :
-            - D’une part:
-                - C : [0.1, 1, 10]
-                - solver : “lbfgs”
-                - penalty : “l2”
-            - D’autre part:
-                - C : [0.1, 1, 10]
-                - solver : “saga”
-                - penalty : [“l1”, “elasticnet”]
-                - l1_ratio : 0.5
+
+            | Paramètre | Ensemble 1         | Ensemble 2             |
+            |-----------|--------------------|------------------------|
+            | C         | [0.1, 1, 10]       | [0.1, 1, 10]           |
+            | solver    | "lbfgs"            | "saga"                 |
+            | penalty   | "l2"               | ["l1", "elasticnet"]   |
+            | l1_ratio  | —                  | 0.5                    |
 
             La régression logistique n'est pas assez performante pour la classification des images. Nous décidons donc d'entraîner un modèle CNN personnalisé au vu du nombre de données disponibles raisonnable.
-
-            **Rapport de classification**
             """
         )
-        image_log_reg_report_main_data = {
-            'Class': ['10', '40', '50', '60', '1140', '1160', '1180', '1280', '1281', '1300', '1301', '1302', '1320', '1560', '1920', '1940', '2060', '2220', '2280', '2403', '2462', '2522', '2582', '2583', '2585', '2705', '2905'],
-            "Precision": [0.31, 0.24, 0.08, 0.04, 0.17, 0.49, 0.04, 0.13, 0.07, 0.18,
-                        0.05, 0.09, 0.19, 0.19, 0.48, 0.05, 0.28, 0.04, 0.45, 0.29,
-                        0.13, 0.28, 0.11, 0.47, 0.09, 0.44, 0.56],
-            "Recall": [0.39, 0.21, 0.13, 0.18, 0.15, 0.55, 0.15, 0.01, 0.03, 0.07,
-                    0.25, 0.06, 0.17, 0.13, 0.51, 0.24, 0.19, 0.15, 0.38, 0.26,
-                    0.29, 0.31, 0.10, 0.21, 0.10, 0.69, 0.91],
-            "F1-score": [0.35, 0.22, 0.10, 0.07, 0.16, 0.52, 0.07, 0.02, 0.04, 0.10,
-                        0.08, 0.08, 0.18, 0.16, 0.49, 0.09, 0.23, 0.06, 0.41, 0.28,
-                        0.18, 0.30, 0.10, 0.29, 0.09, 0.54, 0.70],
-            "Support": [623, 502, 336, 166, 534, 791, 153, 974, 414, 1009,
-                        161, 498, 648, 1015, 861, 161, 999, 165, 952, 955,
-                        284, 998, 518, 2042, 499, 552, 174]
-        }
-        st.dataframe(image_log_reg_report_main_data, height=300)
         image_log_reg_report_acc_data = {
             "Metric": ["Accuracy", "Macro avg", "Weighted avg"],
             "Precision": [None, 0.22, 0.27],
@@ -190,6 +170,26 @@ def run():
             "Support": [16984, 16984, 16984]
         }
         st.dataframe(image_log_reg_report_acc_data)
+        with st.expander("Performance"):
+            st.markdown("**Classification report**")
+            image_log_reg_report_main_data = {
+                'Class': ['10', '40', '50', '60', '1140', '1160', '1180', '1280', '1281', '1300', '1301', '1302', '1320', '1560', '1920', '1940', '2060', '2220', '2280', '2403', '2462', '2522', '2582', '2583', '2585', '2705', '2905'],
+                "Precision": [0.31, 0.24, 0.08, 0.04, 0.17, 0.49, 0.04, 0.13, 0.07, 0.18,
+                            0.05, 0.09, 0.19, 0.19, 0.48, 0.05, 0.28, 0.04, 0.45, 0.29,
+                            0.13, 0.28, 0.11, 0.47, 0.09, 0.44, 0.56],
+                "Recall": [0.39, 0.21, 0.13, 0.18, 0.15, 0.55, 0.15, 0.01, 0.03, 0.07,
+                        0.25, 0.06, 0.17, 0.13, 0.51, 0.24, 0.19, 0.15, 0.38, 0.26,
+                        0.29, 0.31, 0.10, 0.21, 0.10, 0.69, 0.91],
+                "F1-score": [0.35, 0.22, 0.10, 0.07, 0.16, 0.52, 0.07, 0.02, 0.04, 0.10,
+                            0.08, 0.08, 0.18, 0.16, 0.49, 0.09, 0.23, 0.06, 0.41, 0.28,
+                            0.18, 0.30, 0.10, 0.29, 0.09, 0.54, 0.70],
+                "Support": [623, 502, 336, 166, 534, 791, 153, 974, 414, 1009,
+                            161, 498, 648, 1015, 861, 161, 999, 165, 952, 955,
+                            284, 998, 518, 2042, 499, 552, 174]
+            }
+            st.dataframe(image_log_reg_report_main_data, height=300)
+            st.markdown("**Matrice de confusion**")
+            st.image("assets/heatmaps/logistic_regression_image_confusion_matrix.png")
         st.markdown("#### CNN Keras")
         st.markdown(
             """
@@ -220,14 +220,15 @@ def run():
 
             """
         )
-        st.markdown("**Matrice de confusion**")
-        st.image("assets/heatmaps/cnn_image_confusion_matrix.png")
         st.markdown(
             """
             Le modèle CNN personnalisé que nous avons entraîné est malheureusement un échec : on observe un collapse rendant le modèle inutilisable. (Classe: outillage et accessoires pour travaux ou jardinage)
             Nous décidons donc d'entraîner un modèle Fine tuned Resnet avec une base de reconnaissance d'images déjà solide.
             """
         )
+        with st.expander("Matrice de confusion"):
+            st.image("assets/heatmaps/cnn_image_confusion_matrix.png")
+
         st.markdown(
             """
             #### Fine tuned Resnet
@@ -246,25 +247,6 @@ def run():
             Nous avons décidé de dégeler le dernier bloc et de fournir notre propre sortie pour la classification.
             """
         )
-        st.markdown("**Rapport de classification**")
-        resnet_report_main_data = {
-            "Class": [10, 40, 50, 60, 1140, 1160, 1180, 1280, 1281, 1300,
-              1301, 1302, 1320, 1560, 1920, 1940, 2060, 2220, 2280,
-              2403, 2462, 2522, 2582, 2583, 2585, 2705, 2905],
-            "Precision": [0.62, 0.58, 0.32, 0.59, 0.55, 0.84, 0.36, 0.28, 0.36, 0.56,
-                        0.37, 0.41, 0.35, 0.48, 0.73, 0.48, 0.45, 0.51, 0.53, 0.39,
-                        0.49, 0.56, 0.34, 0.61, 0.27, 0.62, 0.49],
-            "Recall": [0.24, 0.32, 0.19, 0.58, 0.37, 0.80, 0.15, 0.43, 0.07, 0.58,
-                    0.38, 0.20, 0.41, 0.48, 0.72, 0.59, 0.36, 0.13, 0.71, 0.71,
-                    0.30, 0.54, 0.36, 0.73, 0.20, 0.64, 0.49],
-            "F1-score": [0.35, 0.41, 0.24, 0.58, 0.45, 0.82, 0.21, 0.34, 0.11, 0.57,
-                        0.38, 0.27, 0.38, 0.48, 0.73, 0.53, 0.40, 0.20, 0.61, 0.51,
-                        0.37, 0.55, 0.35, 0.67, 0.23, 0.63, 0.49],
-            "Support": [623, 502, 336, 166, 534, 791, 153, 974, 414, 1009,
-                        161, 498, 648, 1015, 861, 161, 999, 165, 952, 955,
-                        284, 998, 518, 2042, 499, 552, 174]
-        }
-        st.dataframe(resnet_report_main_data, height=300)
         resnet_report_acc_data = {
             "Metric": ["Accuracy", "Macro avg", "Weighted avg"],
             "Precision": [None, 0.49, 0.51],
@@ -273,13 +255,35 @@ def run():
             "Support": [16984, 16984, 16984]
         }
         st.dataframe(resnet_report_acc_data)
-        st.markdown("**Matrice de confusion**")
-        st.image("assets/heatmaps/resnet_confusion_matrix.png")
         st.markdown(
             """
             Le modèle obtient une performance satisfaisante sachant que certaines images sont difficiles à classifier car certains types d'objets peuvent appartenir à plusieurs classes. Par exemple les figurines peuvent être classées comme des jouets ou des objets de collection de jeu vidéo.
             """
         )
+        with st.expander("Performance"):
+            st.markdown("**Rapport de classification**")
+            resnet_report_main_data = {
+                "Class": [10, 40, 50, 60, 1140, 1160, 1180, 1280, 1281, 1300,
+                1301, 1302, 1320, 1560, 1920, 1940, 2060, 2220, 2280,
+                2403, 2462, 2522, 2582, 2583, 2585, 2705, 2905],
+                "Precision": [0.62, 0.58, 0.32, 0.59, 0.55, 0.84, 0.36, 0.28, 0.36, 0.56,
+                            0.37, 0.41, 0.35, 0.48, 0.73, 0.48, 0.45, 0.51, 0.53, 0.39,
+                            0.49, 0.56, 0.34, 0.61, 0.27, 0.62, 0.49],
+                "Recall": [0.24, 0.32, 0.19, 0.58, 0.37, 0.80, 0.15, 0.43, 0.07, 0.58,
+                        0.38, 0.20, 0.41, 0.48, 0.72, 0.59, 0.36, 0.13, 0.71, 0.71,
+                        0.30, 0.54, 0.36, 0.73, 0.20, 0.64, 0.49],
+                "F1-score": [0.35, 0.41, 0.24, 0.58, 0.45, 0.82, 0.21, 0.34, 0.11, 0.57,
+                            0.38, 0.27, 0.38, 0.48, 0.73, 0.53, 0.40, 0.20, 0.61, 0.51,
+                            0.37, 0.55, 0.35, 0.67, 0.23, 0.63, 0.49],
+                "Support": [623, 502, 336, 166, 534, 791, 153, 974, 414, 1009,
+                            161, 498, 648, 1015, 861, 161, 999, 165, 952, 955,
+                            284, 998, 518, 2042, 499, 552, 174]
+            }
+            st.dataframe(resnet_report_main_data, height=300)
+
+            st.markdown("**Matrice de confusion**")
+            st.image("assets/heatmaps/resnet_confusion_matrix.png")
+
     with tab3:
         st.markdown("""
         Nous avons testé deux modèles multimodaux simples : le late fusion et le stacking.
