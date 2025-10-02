@@ -152,7 +152,7 @@ def main():
     print("\n" + "=" * 80)
     print("6. Creating text features (TF-IDF + SVD)")
     print("=" * 80)
-    tfidf = TfidfVectorizer(max_features=5000)
+    tfidf = TfidfVectorizer(max_features=10000)
     X_train_tfidf = tfidf.fit_transform(train_data['text'])
     X_val_tfidf = tfidf.transform(val_data['text'])
     X_test_tfidf = tfidf.transform(test_data['text'])
@@ -162,7 +162,7 @@ def main():
     X_val_text = svd.transform(X_val_tfidf)
     X_test_text = svd.transform(X_test_tfidf)
     
-    print(f"TF-IDF features: 5000")
+    print(f"TF-IDF features: 10000")
     print(f"SVD components: 300")
     print(f"Final text feature shape: {X_train_text.shape}")
     
@@ -173,8 +173,9 @@ def main():
     print("7. Training XGBoost on text features")
     print("=" * 80)
     xgb_model = xgb.XGBClassifier(
-        n_estimators=100,
-        max_depth=6,
+        n_estimators=300,
+        learning_rate=0.2,
+        max_depth=3,
         random_state=42,
         n_jobs=-1
     )
@@ -200,6 +201,8 @@ def main():
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(15),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
@@ -240,7 +243,10 @@ def main():
         param.requires_grad = True
     
     # Replace final FC layer
-    model.fc = nn.Linear(model.fc.in_features, n_classes)
+    model.fc = nn.Sequential(
+        nn.Dropout(0.5),
+        nn.Linear(model.fc.in_features, n_classes)
+    )
     for param in model.fc.parameters():
         param.requires_grad = True
     
@@ -249,7 +255,7 @@ def main():
     print("Layer4 + FC unfrozen for training")
     
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001)
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.0005, weight_decay=1e-3)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5)
     
     # -----------------------------
