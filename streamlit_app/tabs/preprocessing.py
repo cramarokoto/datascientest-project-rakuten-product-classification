@@ -85,11 +85,24 @@ def run():
         st.markdown("Les données textuelles prétraitées sont sauvegardées au format **pkl** via joblib.")
 
     with tab3:
+        st.markdown("""
+        Les différents modèles prenant en entrée des formats d'images différents, nous avons adapté le prétraitement pour chaque modèle.
+                    
+        On considère la Régression logistique, un CNN personnalisé avec Keras et un CNN fine-tuned (Resnet18).
+        """)
+    
         st.markdown("#### Transformation des images")
         st.markdown("""
+        Régression Logistique:
         - Passage de **500×500 couleur** ➝ **200×200 niveaux de gris**  
         - Réduction mémoire : 750 000 valeurs ➝ 40 000 valeurs par image
         - Perte d'information (couleur, détails) compensée par gain en performance et coût calcul
+                    
+        CNN personnalisé:
+        - Passage de **500×500 couleur** ➝ **224×224 niveaux de gris**
+                    
+        Resnet18:
+        - Passage de **500×500 couleur** ➝ **224×224 couleur**
         """)
 
         st.markdown("#### Alignement avec les données textuelles")
@@ -107,21 +120,25 @@ def run():
 
         st.markdown("#### Réduction de dimension")
         st.markdown("""
-        Les modèles de classification d'images demandent différents formats d'input et sont plus ou moins gourmands selon le nombre de features.  
-        Nous avons choisi de réduire la dimension des images pour la régression logistique par **PCA incrémental** tandis qu'on ne fait varier que la taille des images pour les CNN.
+        Régression Logistique:
+        - **PCA incrémental**: 40 000 features ➝ 256 features
         """)
 
         st.markdown("#### Conclusion")
         st.markdown("""
-        Le preprocessing des images et textes vise à :  
-        - Réduire la complexité computationnelle  
-        - Aligner données textuelles et visuelles  
+        Le preprocessing des images et textes vise à :
+        - Réduire la complexité computationnelle 
+        - Aligner données textuelles et visuelles
         - Préserver autant que possible l’information utile
         """)
-
+ 
         st.markdown("#### Alternative envisagée")
         st.markdown("""
-        - Conserver les couleurs
+        Régression Logistique:
+        - Conserver les couleurs 
         - Appliquer un PCA sur des données non réduites
-        - Comparer **info en gris avec plus de pixels** vs **info en couleur avec moins de pixels**
+        - Comparer **info en gris avec plus de pixels** vs **info en couleurs avec moins de pixels**
+                    
+        CNN personnalisé:
+        - Comparer **info en gris** vs **info en couleurs**
         """)
