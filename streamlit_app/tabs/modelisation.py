@@ -291,22 +291,7 @@ def run():
 
         Malgré notre intuition initiale, cette tentative atteinte une précision de 0.75 égale à celle du modèle XGBoost textuel seul. On en déduit qu'il n'y a pas de gain significatif à combiner les modèles textuels et visuels si leurs prédictions ne se complètent pas.
         """)
-        late_fusion_report_main_data = {
-            "class": [10, 40, 50, 60, 1140, 1160, 1180, 1280, 1281, 1300, 1301, 1302, 1320, 1560,
-                    1920, 1940, 2060, 2220, 2280, 2403, 2462, 2522, 2582, 2583, 2585, 2705, 2905],
-            "precision": [0.58, 0.69, 0.60, 0.85, 0.80, 0.91, 0.60, 0.68, 0.46, 0.78, 0.61, 0.68,
-                        0.73, 0.82, 0.87, 0.58, 0.69, 0.65, 0.82, 0.79, 0.64, 0.78, 0.53, 0.97,
-                        0.48, 0.78, 0.77],
-            "recall": [0.62, 0.67, 0.75, 0.81, 0.74, 0.95, 0.58, 0.41, 0.49, 0.86, 0.90, 0.67,
-                    0.62, 0.62, 0.85, 0.90, 0.69, 0.74, 0.72, 0.76, 0.79, 0.83, 0.70, 0.88,
-                    0.71, 0.90, 0.98],
-            "f1-score": [0.60, 0.68, 0.66, 0.83, 0.77, 0.93, 0.59, 0.51, 0.48, 0.82, 0.73, 0.68,
-                        0.67, 0.71, 0.86, 0.71, 0.69, 0.69, 0.77, 0.78, 0.71, 0.81, 0.61, 0.92,
-                        0.57, 0.83, 0.86],
-            "support": [624, 501, 336, 166, 534, 791, 153, 974, 414, 1009, 161, 498, 649, 1015,
-                        861, 160, 999, 165, 952, 955, 284, 998, 518, 2042, 499, 552, 174]
-        }
-        st.dataframe(late_fusion_report_main_data, height=300)
+        
         late_fusion_report_acc_data = {
             "metric": ["accuracy", "macro avg", "weighted avg"],
             "precision": [None, 0.71, 0.76],
@@ -314,32 +299,33 @@ def run():
             "f1-score": [0.75, 0.72, 0.75],
             "support": [16984, 16984, 16984]
         }
-        st.markdown("**Rapport de classification**")
         st.dataframe(late_fusion_report_acc_data)
-        st.markdown("**Matrice de confusion**")
-        st.image("assets/heatmaps/late_fusion_confusion_matrix.png")
+        with st.expander("Performance"):
+            st.markdown("**Rapport de classification**")
+            late_fusion_report_main_data = {
+                "class": [10, 40, 50, 60, 1140, 1160, 1180, 1280, 1281, 1300, 1301, 1302, 1320, 1560,
+                        1920, 1940, 2060, 2220, 2280, 2403, 2462, 2522, 2582, 2583, 2585, 2705, 2905],
+                "precision": [0.58, 0.69, 0.60, 0.85, 0.80, 0.91, 0.60, 0.68, 0.46, 0.78, 0.61, 0.68,
+                            0.73, 0.82, 0.87, 0.58, 0.69, 0.65, 0.82, 0.79, 0.64, 0.78, 0.53, 0.97,
+                            0.48, 0.78, 0.77],
+                "recall": [0.62, 0.67, 0.75, 0.81, 0.74, 0.95, 0.58, 0.41, 0.49, 0.86, 0.90, 0.67,
+                        0.62, 0.62, 0.85, 0.90, 0.69, 0.74, 0.72, 0.76, 0.79, 0.83, 0.70, 0.88,
+                        0.71, 0.90, 0.98],
+                "f1-score": [0.60, 0.68, 0.66, 0.83, 0.77, 0.93, 0.59, 0.51, 0.48, 0.82, 0.73, 0.68,
+                            0.67, 0.71, 0.86, 0.71, 0.69, 0.69, 0.77, 0.78, 0.71, 0.81, 0.61, 0.92,
+                            0.57, 0.83, 0.86],
+                "support": [624, 501, 336, 166, 534, 791, 153, 974, 414, 1009, 161, 498, 649, 1015,
+                            861, 160, 999, 165, 952, 955, 284, 998, 518, 2042, 499, 552, 174]
+            }
+            st.dataframe(late_fusion_report_main_data, height=250)
+            st.markdown("**Matrice de confusion**")
+            st.image("assets/heatmaps/late_fusion_confusion_matrix.png")
         st.markdown("##### Stacking")
         st.markdown("""
         Le modèle de stacking est un modèle qui ajoute un méta classifieur ajustant les poids des modèles de classification des textes et des images selon les classes.
 
         Idem, ce modèle atteint une précision de 0.72 en dessous de celle du modèle XGBoost textuel seul. Cela peut s'expliquer par le fait que les modèles de classification des textes et des images ne sont pas assez performants pour se compléter et/ou que nos paramètres ne sont pas optimisés pour le méta classifieur.
         """)
-        stacking_report_main_data = {
-            "class": [10, 40, 50, 60, 1140, 1160, 1180, 1280, 1281, 1300, 1301, 1302, 1320, 1560,
-              1920, 1940, 2060, 2220, 2280, 2403, 2462, 2522, 2582, 2583, 2585, 2705, 2905],
-            "precision": [0.34, 0.58, 0.67, 0.93, 0.69, 0.90, 0.67, 0.57, 0.48, 0.78, 0.95, 0.67,
-                        0.63, 0.77, 0.87, 0.80, 0.72, 0.87, 0.57, 0.70, 0.71, 0.87, 0.64, 0.98,
-                        0.59, 0.60, 0.96],
-            "recall": [0.46, 0.56, 0.75, 0.78, 0.75, 0.83, 0.58, 0.50, 0.51, 0.79, 0.89, 0.69,
-                    0.69, 0.74, 0.87, 0.82, 0.72, 0.73, 0.58, 0.65, 0.74, 0.79, 0.71, 0.89,
-                    0.72, 0.63, 0.95],
-            "f1-score": [0.39, 0.57, 0.71, 0.85, 0.72, 0.86, 0.62, 0.53, 0.49, 0.78, 0.92, 0.68,
-                        0.66, 0.76, 0.87, 0.81, 0.72, 0.80, 0.57, 0.68, 0.73, 0.83, 0.67, 0.93,
-                        0.65, 0.62, 0.96],
-            "support": [624, 501, 336, 166, 534, 791, 153, 974, 414, 1009, 161, 498, 649, 1015,
-                        861, 160, 999, 165, 952, 955, 284, 998, 518, 2042, 499, 552, 174]
-        }
-        st.dataframe(stacking_report_main_data, height=300)
         stacking_report_acc_data = {
             "metric": ["accuracy", "macro avg", "weighted avg"],
             "precision": [None, 0.72, 0.73],
@@ -347,7 +333,24 @@ def run():
             "f1-score": [0.72, 0.72, 0.72],
             "support": [16984, 16984, 16984]
         }
-        st.markdown("**Rapport de classification**")
         st.dataframe(stacking_report_acc_data)
-        st.markdown("**Rapport de classification**")
-        st.image("assets/heatmaps/stacking_confusion_matrix.png")
+        with st.expander("Performance"):
+            st.markdown("**Rapport de classification**")
+            stacking_report_main_data = {
+                "class": [10, 40, 50, 60, 1140, 1160, 1180, 1280, 1281, 1300, 1301, 1302, 1320, 1560,
+                1920, 1940, 2060, 2220, 2280, 2403, 2462, 2522, 2582, 2583, 2585, 2705, 2905],
+                "precision": [0.34, 0.58, 0.67, 0.93, 0.69, 0.90, 0.67, 0.57, 0.48, 0.78, 0.95, 0.67,
+                            0.63, 0.77, 0.87, 0.80, 0.72, 0.87, 0.57, 0.70, 0.71, 0.87, 0.64, 0.98,
+                            0.59, 0.60, 0.96],
+                "recall": [0.46, 0.56, 0.75, 0.78, 0.75, 0.83, 0.58, 0.50, 0.51, 0.79, 0.89, 0.69,
+                        0.69, 0.74, 0.87, 0.82, 0.72, 0.73, 0.58, 0.65, 0.74, 0.79, 0.71, 0.89,
+                        0.72, 0.63, 0.95],
+                "f1-score": [0.39, 0.57, 0.71, 0.85, 0.72, 0.86, 0.62, 0.53, 0.49, 0.78, 0.92, 0.68,
+                            0.66, 0.76, 0.87, 0.81, 0.72, 0.80, 0.57, 0.68, 0.73, 0.83, 0.67, 0.93,
+                            0.65, 0.62, 0.96],
+                "support": [624, 501, 336, 166, 534, 791, 153, 974, 414, 1009, 161, 498, 649, 1015,
+                            861, 160, 999, 165, 952, 955, 284, 998, 518, 2042, 499, 552, 174]
+            }
+            st.dataframe(stacking_report_main_data, height=250)
+            st.markdown("**Matrice de confusion**")
+            st.image("assets/heatmaps/stacking_confusion_matrix.png")
