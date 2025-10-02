@@ -135,6 +135,16 @@ def run():
             """
         )
         st.markdown("#### Régression logistique")
+        st.markdown("##### Réduction de dimension par PCA incrémental")
+        st.markdown("""
+        - Utilisation d’un PCA incrémental (batch 512 images)  
+        - Réduction : **40 000 ➝ 256 composantes**
+        - Normalisation [0,1] en float32
+                    
+        Cette réduction de dimension permet de diminuer drastiquement le temps d’entraînement de la régression logistique. Cependant, nous avions déjà eu une perte d'information en passant de 500x500 en couleurs à 200x200 en niveaux de gris.
+                    
+        Pour des résultats optimaux en évitant une double perte d'information, nous aurions pu appliquer ce même PCA sur les images 500x500 en couleurs mais le PCA aussi est couteux. La logreg étant surtout à but exploratoire, nous avons conservé cette approche.
+        """)
         st.markdown(
             """
             ##### Méthodologie
@@ -212,7 +222,7 @@ def run():
         st.image("assets/heatmaps/cnn_image_confusion_matrix.png")
         st.markdown(
             """
-            Le modèle CNN personnalisé que nous avons entraîné est malheureusement un échec : on observe un collapse rendant le modèle inutilisable.
+            Le modèle CNN personnalisé que nous avons entraîné est malheureusement un échec : on observe un collapse rendant le modèle inutilisable. (Classe: outillage et accessoires pour travaux ou jardinage)
             Nous décidons donc d'entraîner un modèle Fine tuned Resnet avec une base de reconnaissance d'images déjà solide.
             """
         )

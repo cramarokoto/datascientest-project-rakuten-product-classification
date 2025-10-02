@@ -105,11 +105,10 @@ def run():
         Même séparation train/test que pour les données textuelles afin de garantir la validité des comparaisons.
         """)
 
-        st.markdown("#### Réduction de dimension par PCA incrémental")
+        st.markdown("#### Réduction de dimension")
         st.markdown("""
-        - Utilisation d’un PCA incrémental (batch 512 images)  
-        - Réduction : **40 000 ➝ 256 composantes**
-        - Normalisation [0,1] en float32
+        Les modèles de classification d'images demandent différents formats d'input et sont plus ou moins gourmands selon le nombre de features.  
+        Nous avons choisi de réduire la dimension des images pour la régression logistique par **PCA incrémental** tandis qu'on ne fait varier que la taille des images pour les CNN.
         """)
 
         st.markdown("#### Conclusion")
@@ -122,7 +121,7 @@ def run():
 
         st.markdown("#### Alternative envisagée")
         st.markdown("""
-        - Conserver les couleurs  
-        - Réduire la dimension autrement (moins de pixels, plus de composantes PCA)  
-        - Comparer **info en gris (plus de détails)** vs **info en couleur (moins mais potentiellement discriminante)**
+        - Conserver les couleurs
+        - Appliquer un PCA sur des données non réduites
+        - Comparer **info en gris avec plus de pixels** vs **info en couleur avec moins de pixels**
         """)
