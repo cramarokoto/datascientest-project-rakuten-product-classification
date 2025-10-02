@@ -152,7 +152,7 @@ def run():
             ##### Hyperparamètres
             Nous avons exploré les hyperparamètres suivants avec HalvingGridSearchCV (score F1 pondéré, validation croisée 3 plis) :
 
-            | Paramètre | Ensemble 1   | Ensemble 2           | Valeurs optimales |
+            | Paramètre | Ensemble 1   | Ensemble 2           | Valeur optimale |
             |-----------|--------------|----------------------|-------------------|
             | C         | [0.1, 1, 10] | [0.1, 1, 10]         | 0.1               |
             | solver    | "lbfgs"      | "saga"               | "saga"            |
