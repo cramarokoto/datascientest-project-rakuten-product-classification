@@ -28,8 +28,9 @@ brut_format = {
     "col_path": "image_path",
 }
 
-CURRENT_FORMAT = preprocessed_format
+CURRENT_FORMAT = brut_format
 RESIZE_DIM = (224, 224)
+ADDED_STR  = "_full" if CURRENT_FORMAT==brut_format else ""
 
 
 # -----------------------------
@@ -152,7 +153,7 @@ def main_cnn():  # Modify CURRENT_FORMAT or RESIZE_DIM to try other parameters.
     elapsed = end_time - start_time
     print(f"Total time to train the model: {elapsed:.2f} seconds, or {elapsed/60:.2f} minutes, or {elapsed/3600:.2f} hours")
 
-    model.save("models/cnn_model.keras")
+    model.save("models/cnn_model" + ADDED_STR + ".keras")
 
     test_ds = make_test_dataset(test_df, y_test_enc)
 
@@ -188,12 +189,12 @@ def main_cnn():  # Modify CURRENT_FORMAT or RESIZE_DIM to try other parameters.
 
     report = classification_report(y_test, y_pred, output_dict=True)
     print("Classification Report:\n", classification_report(y_test, y_pred))
-    with open("./models/cnn_image_classification_report.txt", "w") as f:
+    with open("./models/cnn_image" + ADDED_STR + "_classification_report.txt", "w") as f:
         f.write(classification_report(y_test, y_pred))
 
     conf_matrix = confusion_matrix(y_test, y_pred)
     print("Confusion Matrix:\n", conf_matrix)
-    with open('./models/cnn_image_confusion_matrix.txt', 'w') as f:
+    with open("./models/cnn_image" + ADDED_STR + "_confusion_matrix.txt", "w") as f:
         f.write(str(conf_matrix))
 
     joblib.dump(
@@ -204,10 +205,10 @@ def main_cnn():  # Modify CURRENT_FORMAT or RESIZE_DIM to try other parameters.
             "confusion_matrix": conf_matrix,
             "fit_time": elapsed,
         },
-        "./models/cnn_image_full_data.pkl",
+        "./models/cnn_image" + ADDED_STR + "_full_data.pkl",
     )
 
-    with open("cnn_image_history.json", "w") as f:
+    with open("cnn_image" + ADDED_STR + "_history.json", "w") as f:
         json.dump(history.history, f)
 
     print("\nMy job here is done.")
@@ -219,7 +220,7 @@ def if_model_saved():
         train_paths_labels()
     )
 
-    model = load_model("models/cnn_model.keras")
+    model = load_model("models/cnn_model" + ADDED_STR + ".keras")
     # model = load_model("models/cnn_model.h5") # Depends on the one saved
 
     test_ds = make_test_dataset(test_df, y_test_enc)
@@ -256,15 +257,15 @@ def if_model_saved():
 
     report = classification_report(y_test, y_pred, output_dict=True)
     print("Classification Report:\n", classification_report(y_test, y_pred))
-    with open("./models/cnn_image_classification_report.txt", "w") as f:
+    with open("./models/cnn_image" + ADDED_STR + "_classification_report.txt", "w") as f:
         f.write(classification_report(y_test, y_pred))
 
     conf_matrix = confusion_matrix(y_test, y_pred)
     print("Confusion Matrix:\n", conf_matrix)
-    with open('./models/cnn_image_confusion_matrix.txt', 'w') as f:
+    with open("./models/cnn_image" + ADDED_STR + "_confusion_matrix.txt", "w") as f:
         f.write(str(conf_matrix))
 
-    full_data = joblib.load("./models/cnn_image_full_data.pkl")
+    full_data = joblib.load("./models/cnn_image" + ADDED_STR + "_full_data.pkl")
     elapsed = full_data["fit_time"]
 
     joblib.dump(
@@ -275,7 +276,7 @@ def if_model_saved():
             "confusion_matrix": conf_matrix,
             "fit_time": elapsed,
         },
-        "./models/cnn_image_full_data.pkl",
+        "./models/cnn_image" + ADDED_STR + "_full_data.pkl",
     )
 
     print("\nMy job here is done.")
