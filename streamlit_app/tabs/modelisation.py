@@ -196,7 +196,7 @@ def run():
         st.markdown(
             """
             ##### Méthodologie  
-            - Prétraitement : resize (224×224), normalisation, encodage labels  
+            - Prétraitement : resize (224×224), normalisation, encodage labels, tentatives en niveaux de gris et en couleurs.
             - Split : 80% train / 20% val, test séparé  
             - Dataset : `tf.data` (batch 32, prefetch, AUTOTUNE)  
 
@@ -224,10 +224,11 @@ def run():
         )
         st.markdown(
             """
-            Le modèle CNN personnalisé que nous avons entraîné est malheureusement un échec : on observe un collapse rendant le modèle inutilisable. (Classe: outillage et accessoires pour travaux ou jardinage)
-            Nous décidons donc d'entraîner un modèle Fine tuned Resnet avec une base de reconnaissance d'images déjà solide.
+            Le modèle CNN personnalisé que nous avons entraîné est malheureusement un échec : que ce soit avec les données en niveaux de gris ou en couleurs,
+            on observe un collapse rendant le modèle inutilisable (Classe: outillage et accessoires pour travaux ou jardinage)
             """
         )
+        st.markdown("Nous décidons donc d'entraîner un modèle Fine tuned Resnet avec une base de reconnaissance d'images déjà solide.")
         with st.expander("Matrice de confusion"):
             st.image("assets/heatmaps/cnn_image_confusion_matrix.png")
 

@@ -99,13 +99,15 @@ def run():
     
         st.markdown("#### Transformation des images")
         st.markdown("""
+        Tous les pixels ont suivi une normalisation entre 0 et 1.
+
         **Régression Logistique :**
         - Passage de **500×500 en couleurs** ➝ **200×200 en niveaux de gris**  
         - Réduction mémoire : 750 000 valeurs ➝ 40 000 valeurs par image
         - Perte d'information (couleur, détails) compensée par gain en performance et coût calcul
                     
         **CNN personnalisé :**
-        - Passage de **500×500 en couleurs** ➝ **224×224 en niveaux de gris**
+        - Passage de **500×500 en couleurs** ➝ **224×224**, tentative en niveaux de gris et aussi en couleurs
                     
         **Resnet18 :**
         - Passage de **500×500 en couleurs** ➝ **224×224 en couleurs**
