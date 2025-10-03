@@ -142,7 +142,7 @@ def save_model_and_results(search_model, X_test_red, y_test_enc, le):
 
     report = classification_report(y_test, y_pred, output_dict=True)
     print("Classification Report:\n", report)
-    with open('./models/logistic_regression_image_report.txt', 'w') as f:
+    with open('./models/logistic_regression_image_classification_report.txt', 'w') as f:
         f.write(report)
 
     conf_matrix = confusion_matrix(y_test, y_pred)
@@ -229,7 +229,7 @@ def process_if_already_done():
     
     report = classification_report(y_test, y_pred, output_dict=True)
     print("Classification Report:\n", classification_report(y_test, y_pred))
-    with open("./models/logistic_regression_image_report.txt", "w") as f:
+    with open("./models/logistic_regression_image_classification_report.txt", "w") as f:
         f.write(classification_report(y_test, y_pred))
 
     conf_matrix = confusion_matrix(y_test, y_pred)
