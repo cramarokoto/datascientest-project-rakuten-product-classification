@@ -130,6 +130,7 @@ def run():
 
             st.markdown("**Confusion Matrix**")
             st.image("assets/heatmaps/xgboost_confusion_matrix.png")
+
     with tab2:
         st.markdown(
             """
@@ -236,16 +237,7 @@ def run():
 
             Le modèle Resnet18 est un modèle de reconnaissance d'images pré-entraîné sur le dataset ImageNet. Nous l'avons fine tuned sur notre dataset Rakuten afin de l'adapter à notre problématique.
 
-            | Stage | Layers | Details |
-            |-------|--------|---------|
-            | Input | Conv1 | 7x7 Conv, 64 filters, stride 2 + MaxPool |
-            | Block 1 | 2 layers | 2 x (3x3 Conv, 64) |
-            | Block 2 | 2 layers | 2 x (3x3 Conv, 128) |
-            | Block 3 | 2 layers | 2 x (3x3 Conv, 256) |
-            | Block 4 | 2 layers | 2 x (3x3 Conv, 512) |
-            | Output | FC | Fully Connected, 27 classes (or num_classes) |
-
-            Nous avons décidé de dégeler le dernier bloc et de fournir notre propre sortie pour la classification.
+            Nous avons décidé de dégeler le dernier bloc et de fournir notre propre couche fully connected pour la classification à 27 classes.
             """
         )
         resnet_report_acc_data = {
@@ -294,7 +286,7 @@ def run():
         Le modèle de late fusion est un modèle qui combine les prédictions des modèles de classification des textes et des images.
         Il combine les prédictions du XGBoost textuel et du ResNet image en faisant la moyenne des probabilités des deux modèles.
 
-        Malgré notre intuition initiale, cette tentative atteinte une précision de 0.75 égale à celle du modèle XGBoost textuel seul. On en déduit qu'il n'y a pas de gain significatif à combiner les modèles textuels et visuels si leurs prédictions ne se complètent pas.
+        Malgré notre intuition initiale, cette tentative atteinte un score de 0.75 égale à celui du modèle XGBoost textuel seul. On en déduit qu'il n'y a pas de gain significatif à combiner les modèles textuels et visuels si leurs prédictions ne se complètent pas.
         """)
         
         late_fusion_report_acc_data = {
@@ -327,9 +319,9 @@ def run():
             st.image("assets/heatmaps/late_fusion_confusion_matrix.png")
         st.markdown("##### Stacking")
         st.markdown("""
-        Le modèle de stacking est un modèle qui ajoute un méta classifieur ajustant les poids des modèles de classification des textes et des images selon les classes.
+        Le modèle de stacking ajoute un méta-classifieur (régression logistique) qui combine les probabilités issues des modèles texte et image pour améliorer la classification.
 
-        Idem, ce modèle atteint une précision de 0.72 en dessous de celle du modèle XGBoost textuel seul. Cela peut s'expliquer par le fait que les modèles de classification des textes et des images ne sont pas assez performants pour se compléter et/ou que nos paramètres ne sont pas optimisés pour le méta classifieur.
+        Idem, ce modèle atteint un score de 0.72 en dessous de celui du modèle XGBoost textuel seul. Cela peut s'expliquer par le fait que les modèles de classification des textes et des images ne sont pas assez performants pour se compléter et/ou que nos paramètres ne sont pas optimisés pour le méta classifieur.
         """)
         stacking_report_acc_data = {
             "metric": ["accuracy", "macro avg", "weighted avg"],

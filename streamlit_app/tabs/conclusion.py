@@ -15,6 +15,7 @@ def run():
         #### Résultats
         - Classement optimal avec **textes** (XGBoost) grâce aux désignations riches.
         - **Images seules** (ResNet) insuffisantes → similarité visuelle + manque de détails.
+        - Pas d'amélioration par fusion → complémentarité faible - texte plus informatif
 
         #### Limites techniques
         - Ressources limitées (RAM/GPU) → temps d’entraînement longs.
