@@ -35,3 +35,7 @@ DATA_DIR = BASE_DIR / "data"  # Si vous avez des données
 def get_asset_path(filename):
     """Retourne le chemin complet d'un asset"""
     return str(ASSETS_DIR / filename)
+
+def get_data_path(filename):
+    """Retourne le chemin complet d'un fichier de données"""
+    return str(DATA_DIR / filename)

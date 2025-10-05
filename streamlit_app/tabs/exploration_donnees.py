@@ -11,8 +11,8 @@ def load_data():
     """
     Load the selected data from the csv files
     """
-    X_train = pd.read_csv("data/selected_X_train.csv")
-    y_train = pd.read_csv("data/selected_y_train.csv")
+    X_train = pd.read_csv(config.get_data_path("selected_X_train.csv"))
+    y_train = pd.read_csv(config.get_data_path("selected_y_train.csv"))
     return X_train, y_train
 
 def show_image_with_gray_border(path, caption=None):
@@ -330,7 +330,7 @@ def run():
             st.markdown("---")
             cols = st.columns(2)
             with cols[0]:
-                st.image(f"data/images/image_{row['imageid']}_product_{row['productid']}.jpg")
+                st.image(config.get_data_path(f"images/image_{row['imageid']}_product_{row['productid']}.jpg"))
             with cols[1]:
                 st.markdown(
                     f"""
