@@ -5,7 +5,7 @@ Config file for Streamlit App
 """
 
 from member import Member
-
+from pathlib import Path
 
 TITLE = "Classification de produits Rakuten"
 
@@ -26,3 +26,12 @@ TEAM_MEMBERS = [
 ]
 
 PROMOTION = "Promotion Data scientist - Juillet 2025"
+
+# Chemin de base de l'application
+BASE_DIR = Path(__file__).resolve().parent
+ASSETS_DIR = BASE_DIR / "assets"
+DATA_DIR = BASE_DIR / "data"  # Si vous avez des données
+
+def get_asset_path(filename):
+    """Retourne le chemin complet d'un asset"""
+    return str(ASSETS_DIR / filename)

@@ -1,4 +1,5 @@
 import streamlit as st
+import config
 
 
 title = "Introduction"
@@ -7,7 +8,7 @@ sidebar_name = "Introduction"
 
 def run():
 
-    st.image("assets/shopping.svg")
+    st.image(config.get_asset_path("shopping.svg"))
 
     st.title(title)
 
@@ -22,7 +23,7 @@ def run():
     st.header("En savoir plus")
     cols = st.columns([1, 3])
     with cols[0]:
-        st.image("assets/RIT_logo_big.jpg")
+        st.image(config.get_asset_path("RIT_logo_big.jpg"))
     with cols[1]:
         st.markdown("""
         Pour consulter le détail du challenge et du jeu de données :  

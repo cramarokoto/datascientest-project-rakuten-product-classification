@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import config
 
 
 title = "Prétraitement"
@@ -7,7 +8,7 @@ sidebar_name = "Prétraitement"
 
 
 def run():
-    st.image("assets/processing.svg")
+    st.image(config.get_asset_path("processing.svg"))
     st.title(title)
 
     tab1, tab2, tab3 = st.tabs(["Séparation des données", "Prétraitement des données textuelles", "Prétraitement des données graphiques"])

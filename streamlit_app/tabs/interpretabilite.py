@@ -1,4 +1,5 @@
 import streamlit as st
+import config
 
 
 title = "Interprétabilité"
@@ -6,7 +7,7 @@ sidebar_name = "Interprétabilité"
 
 
 def run():
-    st.image("assets/analysis.svg")
+    st.image(config.get_asset_path("analysis.svg"))
 
     st.title(title)
     
@@ -28,7 +29,7 @@ def run():
             Summary plot - classe avec le score F1 le plus élevé (2905 - jeux en téléchargement):
             """
         )
-        st.image("assets/shap/svd/lr_sum_plot.png", width=500)
+        st.image(config.get_asset_path("shap/svd/lr_sum_plot.png"), width=500)
 
         st.markdown("##### Random Forest")
         st.markdown(
@@ -36,7 +37,7 @@ def run():
             Summary plot - classe avec le score F1 le plus élevé (2905 - jeux en téléchargement):
             """
         )
-        st.image("assets/shap/svd/rfc_sum_plot.png", width=500)
+        st.image(config.get_asset_path("shap/svd/rfc_sum_plot.png"), width=500)
 
         st.markdown("##### XGBoost")
         st.markdown(
@@ -44,7 +45,7 @@ def run():
             Summary plot - classe avec le score F1 le plus élevé (2905 - jeux en téléchargement):
             """
         )
-        st.image("assets/shap/svd/xgb_sum_plot.png", width=500)
+        st.image(config.get_asset_path("shap/svd/xgb_sum_plot.png"), width=500)
 
         st.markdown("#### Préprocessing sans SVD")
         st.markdown(
@@ -65,7 +66,7 @@ def run():
         <span>La classe réelle : 60 - consoles de jeux video</span>
         </p>
         """, unsafe_allow_html=True)
-        st.image("assets/shap/tfidf/lr_forceplot_1.png", width=700)
+        st.image(config.get_asset_path("shap/tfidf/lr_forceplot_1.png"), width=700)
 
         st.markdown("""
         <p style='font-size:13px; line-height:1.2'>
@@ -73,14 +74,14 @@ def run():
         <span>La classe réelle : 1320 - accessoires petite enfance</span>
         </p>
         """, unsafe_allow_html=True)
-        st.image("assets/shap/tfidf/lr_forceplot_2.png", width=700)
+        st.image(config.get_asset_path("shap/tfidf/lr_forceplot_2.png"), width=700)
 
         st.markdown(
             """
             Summary plot - classe avec le score F1 le plus élevé (1301 - accesoires et jeux pour petits enfants/bébés):
             """
         )
-        st.image("assets/shap/tfidf/lr_sumplot.png", width=500)
+        st.image(config.get_asset_path("shap/tfidf/lr_sumplot.png"), width=500)
 
         st.markdown("##### Random Forest") 
         st.markdown("""
@@ -89,7 +90,7 @@ def run():
         <span>La classe réelle : 60 - consoles de jeux video</span>
         </p>
         """, unsafe_allow_html=True)
-        st.image("assets/shap/tfidf/rfc_forceplot_1.png", width=700)
+        st.image(config.get_asset_path("shap/tfidf/rfc_forceplot_1.png"), width=700)
 
         st.markdown("""
         <p style='font-size:13px; line-height:1.2'>
@@ -97,14 +98,14 @@ def run():
         <span>La classe réelle : 1320 - accessoires petite enfance</span>
         </p>
         """, unsafe_allow_html=True)
-        st.image("assets/shap/tfidf/rfc_forceplot_2.png", width=700)
+        st.image(config.get_asset_path("shap/tfidf/rfc_forceplot_2.png"), width=700)
 
         st.markdown(
             """
             Summary plot - classe avec le score F1 le plus élevé (2905 - jeux en téléchargement):
             """
         )
-        st.image("assets/shap/tfidf/rfc_sumplot.png", width=500)
+        st.image(config.get_asset_path("shap/tfidf/rfc_sumplot.png"), width=500)
 
         st.markdown("##### XGBoost")
         st.markdown("""
@@ -113,7 +114,7 @@ def run():
         <span>La classe réelle : 1160 - cartes collectionables</span>
         </p>
         """, unsafe_allow_html=True)
-        st.image("assets/shap/tfidf/xgb_forceplot_1.png", width=700)
+        st.image(config.get_asset_path("shap/tfidf/xgb_forceplot_1.png"), width=700)
 
         st.markdown("""
         <p style='font-size:13px; line-height:1.2'>
@@ -121,14 +122,14 @@ def run():
         <span>La classe réelle : 1300 - voitures miniatures et maquettes</span>
         </p>
         """, unsafe_allow_html=True)
-        st.image("assets/shap/tfidf/xgb_forceplot_2.png", width=700)
+        st.image(config.get_asset_path("shap/tfidf/xgb_forceplot_2.png"), width=700)
 
         st.markdown(
             """
             Summary plot - classe avec le score F1 le plus élevé (2905 - jeux en téléchargement):
             """
         )
-        st.image("assets/shap/tfidf/xgb_sumplot.png", width=500)
+        st.image(config.get_asset_path("shap/tfidf/xgb_sumplot.png"), width=500)
 
     with tab2:
         st.markdown("#### Grad cam du fine tuned Resnet")
@@ -142,32 +143,32 @@ def run():
             - certaines catégories se basent plus sur l'environnement que sur l'objet (par exemple pour les articles de jardinage), ce qui n'est pas stable et forcément discriminant
             """
         )
-        st.image("assets/grad_cam/gc1.png")
-        st.image("assets/grad_cam/gc2.png")
-        st.image("assets/grad_cam/gc3.png")
-        st.image("assets/grad_cam/gc4.png")
-        st.image("assets/grad_cam/gc5.png")
-        st.image("assets/grad_cam/gc6.png")
-        st.image("assets/grad_cam/gc7.png")
-        st.image("assets/grad_cam/gc8.png")
-        st.image("assets/grad_cam/gc9.png")
-        st.image("assets/grad_cam/gc10.png")
-        st.image("assets/grad_cam/gc11.png")
-        st.image("assets/grad_cam/gc12.png")
-        st.image("assets/grad_cam/gc13.png")
-        st.image("assets/grad_cam/gc14.png")
-        st.image("assets/grad_cam/gc15.png")
-        st.image("assets/grad_cam/gc16.png")
-        st.image("assets/grad_cam/gc17.png")
-        st.image("assets/grad_cam/gc18.png")
-        st.image("assets/grad_cam/gc19.png")
-        st.image("assets/grad_cam/gc20.png")
-        st.image("assets/grad_cam/gc21.png")
-        st.image("assets/grad_cam/gc22.png")
-        st.image("assets/grad_cam/gc23.png")
-        st.image("assets/grad_cam/gc24.png")
-        st.image("assets/grad_cam/gc25.png")
-        st.image("assets/grad_cam/gc26.png")
-        st.image("assets/grad_cam/gc27.png")
+        st.image(config.get_asset_path("grad_cam/gc1.png"))
+        st.image(config.get_asset_path("grad_cam/gc2.png"))
+        st.image(config.get_asset_path("grad_cam/gc3.png"))
+        st.image(config.get_asset_path("grad_cam/gc4.png"))
+        st.image(config.get_asset_path("grad_cam/gc5.png"))
+        st.image(config.get_asset_path("grad_cam/gc6.png"))
+        st.image(config.get_asset_path("grad_cam/gc7.png"))
+        st.image(config.get_asset_path("grad_cam/gc8.png"))
+        st.image(config.get_asset_path("grad_cam/gc9.png"))
+        st.image(config.get_asset_path("grad_cam/gc10.png"))
+        st.image(config.get_asset_path("grad_cam/gc11.png"))
+        st.image(config.get_asset_path("grad_cam/gc12.png"))
+        st.image(config.get_asset_path("grad_cam/gc13.png"))
+        st.image(config.get_asset_path("grad_cam/gc14.png"))
+        st.image(config.get_asset_path("grad_cam/gc15.png"))
+        st.image(config.get_asset_path("grad_cam/gc16.png"))
+        st.image(config.get_asset_path("grad_cam/gc17.png"))
+        st.image(config.get_asset_path("grad_cam/gc18.png"))
+        st.image(config.get_asset_path("grad_cam/gc19.png"))
+        st.image(config.get_asset_path("grad_cam/gc20.png"))
+        st.image(config.get_asset_path("grad_cam/gc21.png"))
+        st.image(config.get_asset_path("grad_cam/gc22.png"))
+        st.image(config.get_asset_path("grad_cam/gc23.png"))
+        st.image(config.get_asset_path("grad_cam/gc24.png"))
+        st.image(config.get_asset_path("grad_cam/gc25.png"))
+        st.image(config.get_asset_path("grad_cam/gc26.png"))
+        st.image(config.get_asset_path("grad_cam/gc27.png"))
 
 

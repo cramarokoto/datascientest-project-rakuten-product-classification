@@ -1,4 +1,5 @@
 import streamlit as st
+import config
 
 
 title = "Modélisation"
@@ -6,7 +7,7 @@ sidebar_name = "Modélisation"
 
 
 def run():
-    st.image("assets/processing.svg")
+    st.image(config.get_asset_path("processing.svg"))
 
     st.title(title)
     
@@ -56,7 +57,7 @@ def run():
             st.dataframe(logistic_regression_report_main_data, height=250)
 
             st.markdown("**Confusion Matrix**")
-            st.image("assets/heatmaps/logistic_regression_text_confusion_matrix.png")
+            st.image(config.get_asset_path("heatmaps/logistic_regression_text_confusion_matrix.png"))
         
         st.markdown("#### Random Forest")
         st.markdown(
@@ -94,7 +95,7 @@ def run():
             }
             st.dataframe(random_forest_report_main_data, height=250)
             st.markdown("**Confusion Matrix**")
-            st.image("assets/heatmaps/random_forest_confusion_matrix.png")
+            st.image(config.get_asset_path("heatmaps/random_forest_confusion_matrix.png"))
         
         st.markdown("#### XGBoost")
         st.markdown(
@@ -129,7 +130,7 @@ def run():
             st.dataframe(xgboost_report_main_data, height=250)
 
             st.markdown("**Confusion Matrix**")
-            st.image("assets/heatmaps/xgboost_confusion_matrix.png")
+            st.image(config.get_asset_path("heatmaps/xgboost_confusion_matrix.png"))
 
     with tab2:
         st.markdown(
@@ -190,7 +191,7 @@ def run():
             }
             st.dataframe(image_log_reg_report_main_data, height=300)
             st.markdown("**Matrice de confusion**")
-            st.image("assets/heatmaps/logistic_regression_image_confusion_matrix.png")
+            st.image(config.get_asset_path("heatmaps/logistic_regression_image_confusion_matrix.png"))
 
         st.markdown("#### CNN Keras")
         st.markdown(
@@ -230,7 +231,7 @@ def run():
         )
         st.markdown("Nous décidons donc d'entraîner un modèle Fine tuned Resnet avec une base de reconnaissance d'images déjà solide.")
         with st.expander("Matrice de confusion"):
-            st.image("assets/heatmaps/cnn_image_confusion_matrix.png")
+            st.image(config.get_asset_path("heatmaps/cnn_image_confusion_matrix.png"))
 
         st.markdown(
             """
@@ -276,7 +277,7 @@ def run():
             st.dataframe(resnet_report_main_data, height=300)
 
             st.markdown("**Matrice de confusion**")
-            st.image("assets/heatmaps/resnet_confusion_matrix.png")
+            st.image(config.get_asset_path("heatmaps/resnet_confusion_matrix.png"))
 
     with tab3:
         st.markdown("""
@@ -317,7 +318,7 @@ def run():
             }
             st.dataframe(late_fusion_report_main_data, height=250)
             st.markdown("**Matrice de confusion**")
-            st.image("assets/heatmaps/late_fusion_confusion_matrix.png")
+            st.image(config.get_asset_path("heatmaps/late_fusion_confusion_matrix.png"))
         st.markdown("##### Stacking")
         st.markdown("""
         Le modèle de stacking ajoute un méta-classifieur (régression logistique) qui combine les probabilités issues des modèles texte et image pour améliorer la classification.
@@ -351,7 +352,7 @@ def run():
             }
             st.dataframe(stacking_report_main_data, height=250)
             st.markdown("**Matrice de confusion**")
-            st.image("assets/heatmaps/stacking_confusion_matrix.png")
+            st.image(config.get_asset_path("heatmaps/stacking_confusion_matrix.png"))
 
         st.markdown("##### Feature‑level fusion")
         st.markdown(
@@ -387,4 +388,4 @@ def run():
             }
             st.dataframe(feature_fusion_report_main_data, height=250)
             st.markdown("**Matrice de confusion**")
-            st.image("assets/heatmaps/fusion_confusion_matrix.png")
+            st.image(config.get_asset_path("heatmaps/fusion_confusion_matrix.png"))

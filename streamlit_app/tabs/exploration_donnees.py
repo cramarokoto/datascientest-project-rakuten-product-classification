@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image, ImageOps
+import config
 
 title = "Exploration des données"
 sidebar_name = "Exploration des données"
@@ -20,7 +21,7 @@ def show_image_with_gray_border(path, caption=None):
     st.image(bordered_image, caption=caption)
 
 def run():
-    st.image("assets/statistics.svg")
+    st.image(config.get_asset_path("statistics.svg"))
     st.title(title)
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["Description", "Visualisation des données textuelles", "Visualisation des données graphiques", "Méthodologie", "Échantillon"])
@@ -100,7 +101,7 @@ def run():
             |        2905 |                             jeux en téléchargement |
             """
         )
-        st.image("assets/prdtypecode_distribution.png")
+        st.image(config.get_asset_path("prdtypecode_distribution.png"))
         st.markdown(
             """
             Le jeu de données n'est pas équilibré :
@@ -115,7 +116,7 @@ def run():
         st.markdown("##### Longueur de la variable designation")
         cols = st.columns([3, 1])
         with cols[0]:
-            st.image("assets/designation_length.png")
+            st.image(config.get_asset_path("designation_length.png"))
         with cols[1]:
             st.write(
                 """
@@ -138,7 +139,7 @@ def run():
             """
         )
         st.markdown("##### Distribution de la longueur de designation par catégorie de produit")
-        st.image("assets/designation_per_category.png")
+        st.image(config.get_asset_path("designation_per_category.png"))
         st.markdown(
             """
             La distribution de la longueur de Designation par catégorie de produit n'est pas homogène.
@@ -149,7 +150,7 @@ def run():
         st.markdown("##### Longueur de la variable description")
         cols = st.columns([3, 1])
         with cols[0]:
-            st.image("assets/description_length.png")
+            st.image(config.get_asset_path("description_length.png"))
         with cols[1]:
             st.write(
                 """
@@ -172,7 +173,7 @@ def run():
             """
         )
         st.markdown("##### Distribution de catégorie de produit selon la présence de description")
-        st.image("assets/prdtypecode_by_description_presence.png")
+        st.image(config.get_asset_path("prdtypecode_by_description_presence.png"))
         st.markdown(
             """
             La répartition de produits avec ou sans description n'est pas homogène entre les catégories de produit par rapport au ratio moyen du jeu de données (65% avec et 35% sans description).
@@ -188,15 +189,15 @@ def run():
         )
         cols = st.columns(2)
         with cols[0]:
-            st.image("assets/wordclouds/wc1.png")
-            st.image("assets/wordclouds/wc3.png")
-            st.image("assets/wordclouds/wc5.png")
-            st.image("assets/wordclouds/wc7.png")
+            st.image(config.get_asset_path("wordclouds/wc1.png"))
+            st.image(config.get_asset_path("wordclouds/wc3.png"))
+            st.image(config.get_asset_path("wordclouds/wc5.png"))
+            st.image(config.get_asset_path("wordclouds/wc7.png"))
         with cols[1]:
-            st.image("assets/wordclouds/wc2.png")
-            st.image("assets/wordclouds/wc4.png")
-            st.image("assets/wordclouds/wc6.png")
-            st.image("assets/wordclouds/wc8.png")
+            st.image(config.get_asset_path("wordclouds/wc2.png"))
+            st.image(config.get_asset_path("wordclouds/wc4.png"))
+            st.image(config.get_asset_path("wordclouds/wc6.png"))
+            st.image(config.get_asset_path("wordclouds/wc8.png"))
         st.markdown(
             """
             Les 4 (premiers) wordclouds des catégories de produits avec le plus de descriptions et les 4 (derniers) wordclouds de celles avec le moins de descriptions mettent clairement en avant certains termes plus que d'autres.
@@ -212,7 +213,7 @@ def run():
             """
         )
         st.markdown("##### Format")
-        st.image("assets/images_format.png")
+        st.image(config.get_asset_path("images_format.png"))
         st.markdown(
             """
             Nous observons que toutes les images sont en couleur et de taille 500 × 500 pixels.
@@ -222,11 +223,11 @@ def run():
         st.markdown("##### Content box")
         cols = st.columns(2)
         with cols[0]:
-            show_image_with_gray_border("assets/before_content_dim.png", caption="Avant la détection de la bounding box")
+            show_image_with_gray_border(config.get_asset_path("before_content_dim.png"), caption="Avant la détection de la bounding box")
         with cols[1]:
-            show_image_with_gray_border("assets/after_content_dim.png", caption="Après la détection de la bounding box")
+            show_image_with_gray_border(config.get_asset_path("after_content_dim.png"), caption="Après la détection de la bounding box")
         st.write("Nous déterminons la zone utile de l'image en détectant la bounding box du contenu non blanc. Nous appliquons cette analyse à un échantillon aléatoire du jeu de données pour des raisons de temps de calcul.")
-        st.image("assets/content_dim_is_null.png")
+        st.image(config.get_asset_path("content_dim_is_null.png"))
         st.markdown(
             """
             Quand une image est entièrement blanche, alors le content_dim est nul. Ce n'est pas le cas ici alors aucune de nos images (donc aucune des images liées aux produits) n'est "nulle".
@@ -234,7 +235,7 @@ def run():
             Il ne s'agit que d'un échantillon, même s'il a été choisi aléatoirement, cela ne nous donne pas la proportion exacte. Nous supposerons ainsi qu'aucune image n'est entièrement blanche.
             """
         )
-        st.image("assets/uniformity.png")
+        st.image(config.get_asset_path("uniformity.png"))
         st.markdown(
             """
             52,5% des images n’ont aucune dimension égale à 500, ce qui signifie qu’elles n’occupent pas tout l’espace disponible. Cette hétérogénéité réduit l’efficacité de la zone utile pour l’apprentissage automatique, car la quantité d’information varie fortement selon les images. Pour harmoniser les données, on pourrait appliquer des techniques de Computer Vision, comme l’agrandissement par masques ou filtres jusqu’aux bords. Ainsi, un modèle s’entraînerait sur des images plus cohérentes, évitant de comparer des données pleines d’informations à d’autres majoritairement vides (pixels blancs).
@@ -249,7 +250,7 @@ def run():
             """
         )
 
-        st.image("assets/heatmap2.png")
+        st.image(config.get_asset_path("heatmap2.png"))
         st.markdown(    
             """
             Les valeurs vont de 0.56 (noir), 0.96 (blanc)
@@ -265,7 +266,7 @@ def run():
             Pour étudier le ratio longueur/largeur, il faut considérer la véritable taille des images sans les bords vides, ce qui correspond à la Content Box. Celle-ci définit le plus petit rectangle englobant tous les pixels non-blancs.
             """
         )
-        st.image("assets/width_length_ratio.png")
+        st.image(config.get_asset_path("width_length_ratio.png"))
         st.markdown(
             """           
             La distribution des ratios est globalement symétrique autour de 1, entre 0 et 2. Toutefois, quelques valeurs extrêmes jusqu’à 11 rompent cette symétrie, bien qu’elles deviennent de plus en plus rares en s’éloignant de 1.
